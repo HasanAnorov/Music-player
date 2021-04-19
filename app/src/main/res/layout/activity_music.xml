@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="#170C24"
+    android:layout_height="match_parent"
+    tools:context=".MusicActivity">
+
+    <LinearLayout
+        android:id="@+id/back5"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_percent="0.85"
+        android:background = "@drawable/back5"
+        android:orientation="horizontal" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btn_arrow"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="48dp"
+        android:backgroundTint="#251B31"
+        app:cardCornerRadius="19dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/white"
+            android:background="@drawable/ic_back"
+            android:layout_height="wrap_content"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Ambient"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="@id/btn_arrow"
+        app:layout_constraintBottom_toBottomOf="@id/btn_arrow"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardMusicPhoto"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        app:layout_constraintHeight_percent="0.2"
+        app:layout_constraintWidth_percent="0.4"
+        app:cardCornerRadius="120dp"
+        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/musicPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"
+            android:background="#251B31"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="48dp"
+        app:cardCornerRadius="24dp"
+        android:background="@color/white"
+        android:backgroundTint="@color/white"
+        android:layout_height="48dp"
+        app:layout_constraintTop_toTopOf="@id/cardMusicPhoto"
+        app:layout_constraintBottom_toBottomOf="@id/cardMusicPhoto"
+        app:layout_constraintStart_toStartOf="@id/cardMusicPhoto"
+        app:layout_constraintEnd_toEndOf="@id/cardMusicPhoto"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btn_play_pause"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/musicAuthor"
+        android:backgroundTint="#2C159E"
+        app:cardCornerRadius="30dp">
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/white"
+            android:background="@drawable/ic_play_button_arrowhead"
+            android:layout_height="wrap_content"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/musicName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Months"
+        android:textColor="#170C24"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="31sp"
+        app:layout_constraintTop_toBottomOf="@id/cardMusicPhoto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="36dp"/>
+
+    <TextView
+        android:id="@+id/musicAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calvin Harris"
+        android:textSize="17sp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        app:layout_constraintTop_toBottomOf="@id/musicName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="2dp"/>
+
+    <ImageButton
+        android:id="@+id/playNext"
+        android:layout_width="40dp"
+        android:layout_height="32dp"
+        android:background="@drawable/ic_next"
+        app:layout_constraintTop_toTopOf="@id/btn_play_pause"
+        app:layout_constraintBottom_toBottomOf="@id/btn_play_pause"
+        android:backgroundTint="#170C24"
+        app:layout_constraintStart_toEndOf="@id/btn_play_pause"
+        android:layout_marginStart="24dp"/>
+
+    <ImageButton
+        android:id="@+id/playPrevious"
+        android:layout_width="40dp"
+        android:layout_height="32dp"
+        android:background="@drawable/ic_previous"
+        app:layout_constraintTop_toTopOf="@id/btn_play_pause"
+        app:layout_constraintBottom_toBottomOf="@id/btn_play_pause"
+        android:backgroundTint="#170C24"
+        app:layout_constraintEnd_toStartOf="@id/btn_play_pause"
+        android:layout_marginEnd="24dp"/>
+
+    <ImageButton
+        android:id="@+id/bookmark"
+        android:layout_width="26dp"
+        android:layout_height="22dp"
+        android:background="@drawable/ic_bookmark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="#170C24"
+        app:layout_constraintEnd_toStartOf="@+id/shuffle"/>
+
+    <ImageButton
+        android:id="@+id/shuffle"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/ic_shuffle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="36dp"
+        android:backgroundTint="#170C24"
+        app:layout_constraintStart_toEndOf="@id/bookmark"
+        app:layout_constraintEnd_toStartOf="@+id/repeat"/>
+
+    <ImageButton
+        android:id="@+id/repeat"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:backgroundTint="#170C24"
+        android:background="@drawable/repeat_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintStart_toEndOf="@id/shuffle"
+        app:layout_constraintEnd_toStartOf="@+id/addToList"/>
+
+    <ImageButton
+        android:id="@+id/addToList"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:backgroundTint="#170C24"
+        android:background="@drawable/ic_add_to_queue_icon_153465"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/repeat"/>
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
