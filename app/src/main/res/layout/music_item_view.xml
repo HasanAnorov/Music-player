@@ -15,7 +15,7 @@
         android:textColor="#170C24"
         android:fontFamily="sans-serif-condensed"
         android:textStyle="bold"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:layout_marginStart="16dp"
         android:maxLines="1"
         android:ellipsize="end"
@@ -30,9 +30,9 @@
         app:layout_constraintTop_toBottomOf="@id/musicName"
         android:text="Calvin Harris"
         android:textColor="#DB000000"
-
         android:layout_marginStart="16dp"
         android:maxLines="1"
+        android:textSize="14sp"
         android:ellipsize="end"
         app:layout_constraintEnd_toStartOf="@id/musicTime"
         android:layout_marginEnd="16dp"/>
@@ -44,11 +44,11 @@
         android:text="02:32"
         android:textStyle="bold"
         android:textColor="@color/black"
-        android:textSize="18sp"
+        android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/musicName"
         app:layout_constraintBottom_toBottomOf="@id/musicName"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="16dp"/>
+        android:layout_marginEnd="10dp"/>
 
 
     <androidx.cardview.widget.CardView
