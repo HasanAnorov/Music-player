@@ -2,22 +2,21 @@ package com.example.newdesignmusicplayer.model
 
 import java.io.Serializable
 
-//class ModelAudio(
-//    var audioTitle: String? = null,
-//    var audioDuration: String? = null,
-//    var audioArtist: String? = null,
-//    var audioUri: String? = null
-//
-//):Serializable
-
 class ModelAudio():Serializable{
 
     var audioTitle: String? = null
     var audioDuration: String? = null
     var audioArtist: String? = null
     var audioUri: String? = null
-    var audioPhoto :String? = null
+    var isPlaying:Boolean = false
 
+    fun getIsPlaying(): Boolean {
+        return isPlaying
+    }
+
+    fun setIsPlaying(isPlaying: Boolean) {
+        this.isPlaying = isPlaying
+    }
 
     fun getaudioTitle(): String? {
         return audioTitle
@@ -29,10 +28,6 @@ class ModelAudio():Serializable{
 
     fun getaudioDuration(): String? {
         return audioDuration
-    }
-
-    fun setPhoto(audioPhoto:String?){
-        this.audioPhoto = audioPhoto
     }
 
     fun setaudioDuration(audioDuration: String?) {

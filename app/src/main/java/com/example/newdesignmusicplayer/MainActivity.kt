@@ -2,12 +2,16 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -29,12 +33,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var audioArrayList: ArrayList<ModelAudio>
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+
 
         checkPermissions()
         audioArrayList = arrayListOf()
@@ -50,14 +57,12 @@ class MainActivity : AppCompatActivity() {
                 val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                 val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                 val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-                val photo: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
-                val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
                 val modelAudio = ModelAudio()
                 modelAudio.setaudioTitle(title)
                 modelAudio.setaudioArtist(artist)
                 modelAudio.setaudioUri(url)
                 modelAudio.setaudioDuration(duration)
-                modelAudio.setPhoto(photo)
                 audioArrayList.add(modelAudio)
             } while (cursor.moveToNext())
         }

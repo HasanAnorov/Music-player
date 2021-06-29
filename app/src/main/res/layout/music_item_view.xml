@@ -5,6 +5,8 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
     <TextView
         android:id="@+id/musicName"
         android:layout_width="0dp"
@@ -19,7 +21,7 @@
         android:layout_marginStart="16dp"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintEnd_toStartOf="@id/musicTime"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="16dp"/>
 
     <TextView
@@ -34,21 +36,10 @@
         android:maxLines="1"
         android:textSize="14sp"
         android:ellipsize="end"
-        app:layout_constraintEnd_toStartOf="@id/musicTime"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="16dp"/>
 
-    <TextView
-        android:id="@+id/musicTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="02:32"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/musicName"
-        app:layout_constraintBottom_toBottomOf="@id/musicName"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="10dp"/>
+
 
 
     <androidx.cardview.widget.CardView
@@ -59,7 +50,7 @@
         app:layout_constraintVertical_bias="0.3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="6dp"
         app:cardCornerRadius="27dp">
 
         <ImageView
@@ -69,6 +60,7 @@
             android:layout_height="match_parent"
             android:scaleType="fitXY"
             android:layout_gravity="center"/>
+
 
     </androidx.cardview.widget.CardView>
 

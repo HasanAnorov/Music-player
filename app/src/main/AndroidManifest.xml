@@ -18,7 +18,7 @@
         <activity android:name=".MusicActivity" >
 
         </activity>
-        <activity android:name=".FolderActivity" >
+        <activity android:name=".FolderActivity" android:windowSoftInputMode="adjustNothing" >
 
         </activity>
         <activity android:name=".MainActivity">
@@ -28,6 +28,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".Services.NotificationService"/>
+        <service android:name=".Services.OnClearFromRecentService"/>
     </application>
 
 </manifest>

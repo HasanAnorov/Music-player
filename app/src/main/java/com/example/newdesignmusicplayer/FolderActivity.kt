@@ -1,31 +1,41 @@
 package com.example.newdesignmusicplayer
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Display
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
 import java.io.Serializable
+import java.util.*
 import kotlin.collections.ArrayList
 
-class FolderActivity : AppCompatActivity(),Serializable {
+class FolderActivity : AppCompatActivity(),Serializable,Playable {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
     private lateinit var musicList :ArrayList<ModelAudio>
 
+    var position = 0
+    var isPLaying :Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
+            createChannel()
+        }
 
         val folder = intent.getSerializableExtra("folder") as Folder
         musicList = ArrayList()
@@ -45,25 +55,22 @@ class FolderActivity : AppCompatActivity(),Serializable {
             }
         })
 
-        binding.musicName.text = folder.musicList[0].audioTitle
-        binding.musicAuthor.text = folder.musicList[0].audioArtist
+            adapter =MusicListAdapter(this){ model: ModelAudio, position: Int ->
 
-            adapter =MusicListAdapter{ model: ModelAudio, position: Int ->
+                musicList[position].isPlaying = true
+                adapter.notifyItemChanged(position)
+
+                CreateNotification().createNotification(this,model,R.drawable.ic_play_button_arrowhead,position,musicList.size-1)
+
             val intent = Intent(this, MusicActivity::class.java)
             intent.putExtra("musics", musicList)
             intent.putExtra("pos", position)
             startActivity(intent)
-
-            binding.musicAuthor.text = model.audioArtist
-            binding.musicName.text = model.audioTitle
-
         }
 
-        binding.cardPausePlay.setOnClickListener {
+        binding.recyclerView.setHasFixedSize(true)
 
-        }
-
-        adapter.differ.submitList(folder.musicList)
+        adapter.differ.submitList(musicList)
         binding.recyclerView.adapter = adapter
 
         binding.btnArrow.setOnClickListener {
@@ -71,15 +78,21 @@ class FolderActivity : AppCompatActivity(),Serializable {
             startActivity(intent)
             finish()
         }
+    }
 
+    private fun createChannel() {
+        val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"Hasan",
+            NotificationManager.IMPORTANCE_LOW)
+        val notificationManager : NotificationManager =getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
     }
 
      fun onQueryTextChange(newText: String){
         val folder = intent.getSerializableExtra("folder") as Folder
-        val userInput = newText.toLowerCase()
+        val userInput = newText.toLowerCase(Locale.ROOT)
         val myFiles = ArrayList<ModelAudio>()
         for (song in folder.musicList) {
-            if (song.audioTitle!!.toLowerCase().contains(userInput)){
+            if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
                 myFiles.add(song)
             }
         }
@@ -87,6 +100,46 @@ class FolderActivity : AppCompatActivity(),Serializable {
          musicList = myFiles
         adapter.differ.submitList(myFiles)
 
+    }
+
+    var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            val action = intent.extras?.getString("actionname")
+            when(action){
+               CreateNotification().ACTION_PREVIOUS -> {
+                   onTrackPrevious()
+               }
+               CreateNotification().ACTION_PLAY ->{
+                    if (isPLaying){
+                        onTrackPause()
+                    }else{
+                        onTrackPLay()
+                    }
+                }
+               CreateNotification().ACTION_NEXT ->{
+                   onTrackNext()
+               }
+            }
+        }
+    }
+
+    override fun onTrackPrevious() {
+        position--
+        CreateNotification().createNotification(this,musicList[position],R.drawable.ic_pause,position,musicList.size-1)
+        title
+    }
+
+
+    override fun onTrackPLay() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onTrackPause() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onTrackNext() {
+        TODO("Not yet implemented")
     }
 
 }
