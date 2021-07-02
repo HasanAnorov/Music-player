@@ -54,9 +54,10 @@ class MusicListAdapter(private val context:Context, val itemClick: (music: Model
         val image = differ.currentList[position].getaudioUri()?.let { getAlbumArt(it) }
         if (image!=null){
             Glide.with(context).asBitmap().load(image).into(holder.itemView.findViewById(R.id.onGoingMusicImage))
-        }else{
-            Toast.makeText(context, "Something went wrong !", Toast.LENGTH_SHORT).show()
         }
+//        else{
+//            Toast.makeText(context, "Something went wrong !", Toast.LENGTH_SHORT).show()
+//        }
     }
 
     fun getAlbumArt(uri: String): ByteArray? {

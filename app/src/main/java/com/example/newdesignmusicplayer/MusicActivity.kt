@@ -1,15 +1,17 @@
 package com.example.newdesignmusicplayer
 
 import android.Manifest
+import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.provider.MediaStore
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.newdesignmusicplayer.databinding.ActivityMusicBinding
+import androidx.core.graphics.drawable.DrawableCompat
+import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.model.ModelAudio
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -21,7 +23,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 
 class MusicActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMusicBinding
+    private lateinit var binding:ActivityMusicNewBinding
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioArrayList: ArrayList<ModelAudio>
     var current_pos = 0.0
@@ -31,9 +33,20 @@ class MusicActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMusicBinding.inflate(layoutInflater)
+        binding = ActivityMusicNewBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        binding.cardBookmark.elevation = 0F
+        binding.cardAddToList.elevation = 0F
+        binding.cardRepeat.elevation = 0F
+        binding.cardShuffle.elevation = 0F
+
+        //changing status and navigationBar colors
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.statusBarColor = getColor(R.color.musicActivity)
+            window.navigationBarColor = getColor(R.color.musicActivity)
+        }
 
         val position = intent.getIntExtra("pos", 0)
 
@@ -49,32 +62,106 @@ class MusicActivity : AppCompatActivity() {
     //setting audio files
     private fun setAudio(pos: Int) {
 
-    var isRepeatActivated = false
-    var isRandomPlayingActivated = false
+        var isRepeatActivated = false
+        var isRandomPlayingActivated = false
+        var isFavorite = false
 
         audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
         mediaPlayer = MediaPlayer()
         audio_index = pos
 
-    binding.shuffle.setOnClickListener {
-        Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show()
+        binding.cardShuffle.setOnClickListener {
+
         isRandomPlayingActivated =!isRandomPlayingActivated
+
+        var cardDrawable: Drawable = binding.cardShuffle.background
+        cardDrawable = DrawableCompat.wrap(cardDrawable)
+        var ivDrawable = binding.shuffleIv.background
+        ivDrawable = DrawableCompat.wrap(ivDrawable)
+
+        if(isRandomPlayingActivated) {
+
+            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+            binding.cardShuffle.background = cardDrawable
+
+            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+            binding.shuffleIv.background = ivDrawable
+        }else{
+            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+            binding.cardShuffle.background = cardDrawable
+
+            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+            binding.shuffleIv.background = ivDrawable
+        }
+
+        Toast.makeText(this, "shuffle", Toast.LENGTH_SHORT).show()
         if (isRepeatActivated){
             isRepeatActivated = false
         }
     }
 
-    binding.repeat.setOnClickListener{
-        Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show()
+        binding.cardBookmark.setOnClickListener {
+
+            isFavorite = !isFavorite
+
+            var cardDrawable: Drawable = binding.cardBookmark.background
+            cardDrawable = DrawableCompat.wrap(cardDrawable)
+
+            var ivDrawable = binding.bookmarkIv.background
+            ivDrawable = DrawableCompat.wrap(ivDrawable)
+
+            if(isFavorite){
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+                binding.cardBookmark.background = cardDrawable
+
+                binding.bookmarkIv.setBackgroundResource(R.drawable.ic_heart)
+            }else{
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+                binding.cardBookmark.background = cardDrawable
+
+                binding.bookmarkIv.setBackgroundResource(R.drawable.ic_heart__6_)
+            }
+
+            Toast.makeText(this, "bookmark", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.cardRepeat.setOnClickListener{
 
         isRepeatActivated = !isRepeatActivated
+
+        var cardDrawable: Drawable = binding.cardRepeat.background
+        cardDrawable = DrawableCompat.wrap(cardDrawable)
+
+        var ivDrawable = binding.repeatIv.background
+        ivDrawable = DrawableCompat.wrap(ivDrawable)
+
+        if(isRepeatActivated){
+            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+            binding.cardRepeat.background = cardDrawable
+
+            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+            binding.repeatIv.background = ivDrawable
+        }else{
+            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+            binding.cardRepeat.background = cardDrawable
+
+            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+            binding.repeatIv.background = ivDrawable
+        }
+
+        Toast.makeText(this, "repeat", Toast.LENGTH_SHORT).show()
+
         if (isRandomPlayingActivated){
             isRandomPlayingActivated = false
         }
     }
 
+        binding.cardAddToList.setOnClickListener {
+            Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
+        }
+
         //seekbar change listner
-    binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         }
 

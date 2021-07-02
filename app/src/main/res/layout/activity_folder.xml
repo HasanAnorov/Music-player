@@ -35,13 +35,14 @@
         tools:listitem="@layout/music_item_view"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         android:layout_marginBottom="4dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="16dp"/>
+        />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/btn_arrow"
         android:layout_width="38dp"
         android:layout_height="38dp"
+        android:focusable="true"
+        android:clickable="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="32dp"
@@ -51,8 +52,7 @@
 
         <ImageView
             android:id="@+id/iv_back"
-            android:clickable="true"
-            android:focusable="true"
+            android:focusable="false"
             android:layout_width="wrap_content"
             android:layout_gravity="center"
             android:backgroundTint="@color/white"
@@ -72,7 +72,7 @@
         android:layout_marginStart="32dp"
         android:background="#F0EEEF"
         android:layout_marginEnd="16dp"
-        app:cardCornerRadius="27dp">
+        app:cardCornerRadius="15dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -88,7 +88,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="26dp"/>
+                android:layout_marginStart="20dp"/>
 
 
             <EditText

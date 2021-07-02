@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">NewDesignMusicPLayer</string>
     <string name="search">Search ...</string>
-    <string name="calvin_harris">Calvin Harris</string>
     <string name="months">Months</string>
+    <string name="calvin_harris">Calvin Harris</string>
+    <string name="clothes">Clothes</string>
+    <string name="ambient">Ambient</string>
 </resources>

@@ -2,8 +2,6 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
@@ -11,6 +9,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var audioArrayList: ArrayList<ModelAudio>
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +40,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        // status bar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility =(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or  View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+        }
 
+        //status bar color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.statusBarColor = getColor(R.color.white)
+            window.navigationBarColor = getColor(R.color.white)
+
+        }
+        supportActionBar?.hide()
 
         checkPermissions()
         audioArrayList = arrayListOf()
@@ -52,20 +62,24 @@ class MainActivity : AppCompatActivity() {
         val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
 
         //looping through all rows and adding to list
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+        if (cursor != null) {
+            if(cursor.moveToFirst()) {
+                do {
+                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    //val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
                     val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                val modelAudio = ModelAudio()
-                modelAudio.setaudioTitle(title)
-                modelAudio.setaudioArtist(artist)
-                modelAudio.setaudioUri(url)
-                modelAudio.setaudioDuration(duration)
-                audioArrayList.add(modelAudio)
-            } while (cursor.moveToNext())
+                    val modelAudio = ModelAudio()
+                    modelAudio.setaudioTitle(title)
+                    modelAudio.setaudioArtist(artist)
+                    modelAudio.setaudioUri(url)
+                    //modelAudio.setaudioDuration(duration)
+                    audioArrayList.add(modelAudio)
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
         }
+
 
         val adapter = FolderViewPagerAdapter{ model: Folder, position: Int ->
             val intent = Intent(this,FolderActivity::class.java)
@@ -76,7 +90,6 @@ class MainActivity : AppCompatActivity() {
         adapter.differ.submitList(mutableListOf(
                 Folder(R.drawable.ic_thunder,"All songs",audioArrayList),
                 Folder(R.drawable.ic_thunder,"Favorites",audioArrayList)))
-
 
 
         binding.viewPager.adapter=adapter

@@ -7,4 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    //custom colors
+    <color name="musicActivity">#181C27</color>
+    <color name="shuffleColor">#686A76</color>
+
 </resources>
