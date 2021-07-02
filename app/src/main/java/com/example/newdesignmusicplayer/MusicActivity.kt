@@ -62,12 +62,16 @@ class MusicActivity : AppCompatActivity() {
     //setting audio files
     private fun setAudio(pos: Int) {
 
+
+
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
         var isFavorite = false
 
         audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
         mediaPlayer = MediaPlayer()
+        mediaPlayer.reset()
+
         audio_index = pos
 
         binding.cardShuffle.setOnClickListener {
