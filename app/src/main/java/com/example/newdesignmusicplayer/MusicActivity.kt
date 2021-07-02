@@ -118,12 +118,12 @@ class MusicActivity : AppCompatActivity() {
                 DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
                 binding.cardBookmark.background = cardDrawable
 
-                binding.bookmarkIv.setBackgroundResource(R.drawable.ic_heart)
+                binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
             }else{
                 DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
                 binding.cardBookmark.background = cardDrawable
 
-                binding.bookmarkIv.setBackgroundResource(R.drawable.ic_heart__6_)
+                binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
             }
 
             Toast.makeText(this, "bookmark", Toast.LENGTH_SHORT).show()

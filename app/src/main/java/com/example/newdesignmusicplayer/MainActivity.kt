@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         }
         supportActionBar?.hide()
 
+        binding.cardMenu.elevation = 0F
+
         checkPermissions()
         audioArrayList = arrayListOf()
 
@@ -65,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         if (cursor != null) {
             if(cursor.moveToFirst()) {
                 do {
+                    var id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
                     val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                     val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                     //val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
@@ -89,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 
         adapter.differ.submitList(mutableListOf(
                 Folder(R.drawable.ic_thunder,"All songs",audioArrayList),
-                Folder(R.drawable.ic_thunder,"Favorites",audioArrayList)))
+                Folder(R.drawable.ic_star,"Favorites",audioArrayList)))
 
 
         binding.viewPager.adapter=adapter

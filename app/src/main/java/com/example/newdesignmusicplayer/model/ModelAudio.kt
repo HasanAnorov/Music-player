@@ -4,11 +4,20 @@ import java.io.Serializable
 
 class ModelAudio():Serializable{
 
+    //var id :String? = null
     var audioTitle: String? = null
     var audioDuration: String? = null
     var audioArtist: String? = null
     var audioUri: String? = null
     var isPlaying:Boolean = false
+
+//    fun getAudioId(): String? {
+//        return id
+//    }
+//
+//    fun setAudioId(id: String?) {
+//        this.id = id
+//    }
 
     fun getIsPlaying(): Boolean {
         return isPlaying

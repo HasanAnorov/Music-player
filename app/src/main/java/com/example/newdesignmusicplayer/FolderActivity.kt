@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
@@ -33,6 +35,18 @@ class FolderActivity : AppCompatActivity(),Serializable,Playable {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        // status bar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility =(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+        }
+
+        //status bar color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.statusBarColor = getColor(R.color.folderActivity)
+            window.navigationBarColor = getColor(R.color.white)
+
+        }
+
         if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
             createChannel()
         }
@@ -40,6 +54,7 @@ class FolderActivity : AppCompatActivity(),Serializable,Playable {
         val folder = intent.getSerializableExtra("folder") as Folder
         musicList = ArrayList()
         musicList = folder.musicList
+        binding.textView.text = "${folder.musicList.size} tracks"
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -80,6 +95,7 @@ class FolderActivity : AppCompatActivity(),Serializable,Playable {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createChannel() {
         val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"Hasan",
             NotificationManager.IMPORTANCE_LOW)
