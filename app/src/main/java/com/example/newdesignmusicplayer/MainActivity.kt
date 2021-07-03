@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
@@ -51,11 +52,11 @@ class MainActivity : AppCompatActivity() {
             window.navigationBarColor = getColor(R.color.white)
 
         }
-        supportActionBar?.hide()
 
         binding.cardMenu.elevation = 0F
 
         checkPermissions()
+
         audioArrayList = arrayListOf()
 
         //fetch the audio files from storage
@@ -64,27 +65,46 @@ class MainActivity : AppCompatActivity() {
         val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
 
         //looping through all rows and adding to list
-        if (cursor != null) {
-            if(cursor.moveToFirst()) {
-                do {
-                    var id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
-                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                    //val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                    val modelAudio = ModelAudio()
-                    modelAudio.setaudioTitle(title)
-                    modelAudio.setaudioArtist(artist)
-                    modelAudio.setaudioUri(url)
-                    //modelAudio.setaudioDuration(duration)
-                    audioArrayList.add(modelAudio)
-                } while (cursor.moveToNext())
+        when{
+            cursor == null -> {
+                // query failed, handle error.
+                Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
             }
-            cursor.close()
+            !cursor.moveToFirst() -> {
+                // no media on the device
+                Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+            }
+            else ->{
+                //if(cursor.moveToFirst()) {
+                    do {
+                        val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+                        val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                        val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                        val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                        audioArrayList.add(ModelAudio(id,title,"null",artist,url,false,false))
+                    } while (cursor.moveToNext())
+               // }
+                cursor.close()
+            }
+
         }
 
 
-        val adapter = FolderViewPagerAdapter{ model: Folder, position: Int ->
+//        if (cursor != null) {
+//            if(cursor.moveToFirst()) {
+//                do {
+//                    val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+//                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+//                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+//                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+//                    audioArrayList.add(ModelAudio(id,title,"null",artist,url,false,false))
+//                } while (cursor.moveToNext())
+//            }
+//            cursor.close()
+//        }
+
+        //opening clicked playlist
+        val adapter = FolderViewPagerAdapter{ model: Folder ->
             val intent = Intent(this,FolderActivity::class.java)
             intent.putExtra("folder",model)
             startActivity(intent)
@@ -93,7 +113,6 @@ class MainActivity : AppCompatActivity() {
         adapter.differ.submitList(mutableListOf(
                 Folder(R.drawable.ic_thunder,"All songs",audioArrayList),
                 Folder(R.drawable.ic_star,"Favorites",audioArrayList)))
-
 
         binding.viewPager.adapter=adapter
 
@@ -105,16 +124,16 @@ class MainActivity : AppCompatActivity() {
         val compositePageTransformer = CompositePageTransformer()
         compositePageTransformer.addTransformer(MarginPageTransformer(40))
         compositePageTransformer.addTransformer { page, position ->
-
             val r = 1 - abs(position)
             page.scaleY = 0.85f + r * 0.15f
         }
 
         binding.viewPager.setPageTransformer(compositePageTransformer)
-
     }
 
-    //checking permission
+
+
+    //checking permission with dexter
     private fun checkPermissions() {
         Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .withListener(object : PermissionListener {

@@ -67,7 +67,7 @@
         <ImageView
             android:id="@+id/onGoingMusicImage"
             android:layout_width="match_parent"
-            android:background="#131A42"
+            android:src="@drawable/music_photo"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
             android:layout_gravity="center"/>

@@ -9,7 +9,7 @@ import com.example.newdesignmusicplayer.databinding.ViewPagerItemViewBinding
 import com.example.newdesignmusicplayer.model.Folder
 
 
-class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>() {
+class FolderViewPagerAdapter(val itemClick:(folder: Folder) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>() {
 
     private val itemCallback = object : DiffUtil.ItemCallback<Folder>(){
         override fun areItemsTheSame(oldItem: Folder, newItem: Folder): Boolean {
@@ -36,7 +36,7 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): Re
 //                        .into(binding.ivPhoto)
 //            }
             binding.root.setOnClickListener {
-                itemClick.invoke(model,position)
+                itemClick.invoke(model)
             }
         }
     }
@@ -52,7 +52,4 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): Re
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
         holder.onBind(differ.currentList[position],position)
     }
-
-
-
 }

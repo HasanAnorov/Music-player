@@ -33,7 +33,6 @@ class MusicListAdapter(private val context:Context, val itemClick: (music: Model
             binding.musicName.text = model.audioTitle
             binding.musicAuthor.text = model.audioArtist
 
-
             binding.root.setOnClickListener {
                 itemClick.invoke(model, position)
             }
@@ -51,13 +50,13 @@ class MusicListAdapter(private val context:Context, val itemClick: (music: Model
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
         holder.onBind(differ.currentList[position], position)
         //Glide.with(context).load(differ.currentList[position].getaudioUri()).into(holder.itemView)
-        val image = differ.currentList[position].getaudioUri()?.let { getAlbumArt(it) }
+        val image = differ.currentList[position].audioUri?.let {
+            getAlbumArt(it)
+        }
         if (image!=null){
             Glide.with(context).asBitmap().load(image).into(holder.itemView.findViewById(R.id.onGoingMusicImage))
         }
-//        else{
-//            Toast.makeText(context, "Something went wrong !", Toast.LENGTH_SHORT).show()
-//        }
+
     }
 
     fun getAlbumArt(uri: String): ByteArray? {

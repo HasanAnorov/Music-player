@@ -28,7 +28,7 @@ class CreateNotification {
             //val mediaSessionCompat :MediaSession = MediaSessionCom(context,"tag")
             val mediaSessionCompat = MediaSessionCompat(context, "tag")
 
-            val icon = BitmapFactory.decodeResource(context.resources,R.drawable.full4)
+            val icon = BitmapFactory.decodeResource(context.resources,R.drawable.ic_musical_note)
 
             val pendingIntentPrevious: PendingIntent?
             val drw_previous: Int?
@@ -63,7 +63,7 @@ class CreateNotification {
 
             //create notification
             notification = NotificationCompat.Builder(context,CHANNEL_ID)
-                    .setSmallIcon(R.drawable.full4)
+                    .setSmallIcon(R.drawable.ic_musical_note)
                     .setContentTitle(track.audioTitle)
                     .setContentText(track.audioArtist)
                     .setLargeIcon(icon)

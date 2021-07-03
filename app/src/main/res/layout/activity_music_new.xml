@@ -116,7 +116,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:layout_gravity="center"
-            android:background="#251B31"/>
+            android:src="@drawable/music_photo"/>
 
     </androidx.cardview.widget.CardView>
 
@@ -162,6 +162,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginTop="32dp"
+        android:foreground="?android:attr/selectableItemBackground"
         android:focusable="true"
         android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
@@ -172,6 +173,7 @@
 
         <ImageView
             android:focusable="false"
+            android:clickable="false"
             android:id="@+id/playPause"
             android:layout_width="wrap_content"
             android:layout_gravity="center"

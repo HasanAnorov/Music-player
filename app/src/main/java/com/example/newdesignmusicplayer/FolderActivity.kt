@@ -47,6 +47,7 @@ class FolderActivity : AppCompatActivity(),Serializable,Playable {
 
         }
 
+        //creating channel
         if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
             createChannel()
         }

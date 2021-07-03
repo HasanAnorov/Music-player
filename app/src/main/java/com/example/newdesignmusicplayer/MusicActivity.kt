@@ -2,15 +2,17 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.graphics.drawable.Drawable
+import android.media.AudioAttributes
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
+import android.os.*
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
+import com.bumptech.glide.Glide
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.model.ModelAudio
 import com.karumi.dexter.Dexter
@@ -20,8 +22,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 
-
-class MusicActivity : AppCompatActivity() {
+open class MusicActivity : AppCompatActivity() {
 
     private lateinit var binding:ActivityMusicNewBinding
     private lateinit var mediaPlayer: MediaPlayer
@@ -30,7 +31,7 @@ class MusicActivity : AppCompatActivity() {
     private var total_duration: Double = 0.0
     private var audio_index = 0
 
-
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMusicNewBinding.inflate(layoutInflater)
@@ -50,29 +51,63 @@ class MusicActivity : AppCompatActivity() {
 
         val position = intent.getIntExtra("pos", 0)
 
+        //mediaPlayer = MediaPlayer()
+        //mediaPlayer.reset()
+        //mediaPlayer.stop()
+        mediaPlayer = MediaPlayer()
+        mediaPlayer.reset()
+        mediaPlayer.stop()
+
         checkPermissions()
         setAudio(position)
-
 
         binding.btnArrow.setOnClickListener {
            onBackPressed()
         }
+
+    }
+
+    //getting audio image
+    fun getAlbumArt(uri: String): ByteArray? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(uri)
+        val art = retriever.embeddedPicture
+        retriever.release()
+        return art
     }
 
     //setting audio files
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun setAudio(pos: Int) {
-
-
 
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
         var isFavorite = false
 
         audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
-        mediaPlayer = MediaPlayer()
-        mediaPlayer.reset()
 
+        mediaPlayer = MediaPlayer()
+
+        mediaPlayer.reset()
+        mediaPlayer.apply {
+            setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+            setAudioAttributes(
+                    AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .build()
+            )
+        }
+        //mediaPlayer.release()
         audio_index = pos
+
+        //val image = audioArrayList[pos].audioUri?.let { ThumbnailUtils.createAudioThumbnail(it, MediaStore.Images.Thumbnails.MICRO_KIND) }
+        val image = audioArrayList[pos].audioUri?.let { getAlbumArt(it) }
+        if (image!=null){
+            Glide.with(this).asBitmap().load(image).into(binding.musicPhoto)
+        }
+
+
 
         binding.cardShuffle.setOnClickListener {
 
@@ -166,19 +201,19 @@ class MusicActivity : AppCompatActivity() {
 
         //seekbar change listner
         binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        }
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            }
 
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
 
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            current_pos = seekBar!!.progress.toDouble()
-            mediaPlayer.seekTo(current_pos.toInt())
-        }
-    })
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                current_pos = seekBar!!.progress.toDouble()
+                mediaPlayer.seekTo(current_pos.toInt())
+            }
+        })
 
-    mediaPlayer.setOnCompletionListener {
+        mediaPlayer.setOnCompletionListener {
         if (isRandomPlayingActivated){
             val random = (0 until audioArrayList.size).random()
             audio_index = random
@@ -206,17 +241,18 @@ class MusicActivity : AppCompatActivity() {
     //play audio file
     private fun playAudio(pos: Int) {
         try {
-            //mediaPlayer = MediaPlayer()
+            mediaPlayer = MediaPlayer()
+
             mediaPlayer.reset()
             //set file path
-            mediaPlayer.setDataSource(this, Uri.parse(audioArrayList[pos].getaudioUri()!!))
+            mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
             binding.playPause.setImageResource(R.drawable.ic_pause)
             //binding.playPause.setBackgroundColor(R.id.white)
-            binding.musicName.text = audioArrayList[pos].getaudioTitle()
-            binding.musicAuthor.text = audioArrayList[pos].getaudioArtist()
-            binding.musicDuration.text = audioArrayList[pos].getaudioDuration()
+            binding.musicName.text = audioArrayList[pos].audioTitle
+            binding.musicAuthor.text = audioArrayList[pos].audioArtist
+            binding.musicDuration.text = audioArrayList[pos].audioDuration
             audio_index = pos
 
         } catch (e: Exception) {
@@ -281,7 +317,7 @@ class MusicActivity : AppCompatActivity() {
 
     //pause audio
     private fun setPause() {
-        binding.playPause.setOnClickListener {
+        binding.btnPlayPause.setOnClickListener {
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.pause()
                 binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
@@ -311,7 +347,8 @@ class MusicActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer = MediaPlayer()
-        mediaPlayer.reset()
+        mediaPlayer.release()
+        //finish()
     }
 
     //checking permission
