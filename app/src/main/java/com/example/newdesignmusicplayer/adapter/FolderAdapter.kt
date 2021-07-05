@@ -26,7 +26,7 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder) ->Unit): RecyclerVie
     val differ = AsyncListDiffer(this,itemCallback)
 
     inner class ViewHolderHomeFragment(private  var binding:ViewPagerItemViewBinding): RecyclerView.ViewHolder(binding.root){
-        fun onBind(model: Folder, position: Int){
+        fun onBind(model: Folder){
             binding.folderName.text = model.folderName
 
 //            model.musicPhoto.let {
@@ -50,6 +50,6 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder) ->Unit): RecyclerVie
     override fun getItemCount(): Int = differ.currentList.size
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
-        holder.onBind(differ.currentList[position],position)
+        holder.onBind(differ.currentList[position])
     }
 }

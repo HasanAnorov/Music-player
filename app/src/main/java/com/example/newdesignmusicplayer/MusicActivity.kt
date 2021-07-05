@@ -98,6 +98,9 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             startService(Intent(baseContext, OnClearFromRecentService::class.java))
         }
 
+        Toast.makeText(this, "make notification", Toast.LENGTH_SHORT).show()
+        CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+
         binding.playNext.setOnClickListener {
             nextAudio(audioArrayList)
         }
@@ -115,7 +118,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"AppNameHasan",NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"HasanMusic",NotificationManager.IMPORTANCE_LOW)
             notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(channel)
         }
@@ -137,8 +140,9 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
         var isFavorite = true
+        audio_index = pos
 
-        //val audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
+        playAudio(pos,audioArrayList)
 
         mediaPlayer = MediaPlayer()
         mediaPlayer.reset()
@@ -151,8 +155,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                             .build()
             )
         }
-
-        audio_index = pos
 
         binding.cardShuffle.setOnClickListener {
 
@@ -180,7 +182,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             binding.shuffleIv.background = ivDrawable
         }
 
-        Toast.makeText(this, "shuffle", Toast.LENGTH_SHORT).show()
         if (isRepeatActivated){
             isRepeatActivated = false
         }
@@ -192,9 +193,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
             var cardDrawable: Drawable = binding.cardBookmark.background
             cardDrawable = DrawableCompat.wrap(cardDrawable)
-
-            var ivDrawable = binding.bookmarkIv.background
-            ivDrawable = DrawableCompat.wrap(ivDrawable)
 
             if(isFavorite){
                 DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
@@ -235,8 +233,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             binding.repeatIv.background = ivDrawable
         }
 
-        Toast.makeText(this, "repeat", Toast.LENGTH_SHORT).show()
-
         if (isRandomPlayingActivated){
             isRandomPlayingActivated = false
         }
@@ -245,8 +241,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         binding.cardAddToList.setOnClickListener {
             Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
         }
-
-        playAudio(pos,audioArrayList)
 
         //seekbar change listener
         binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -262,6 +256,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             }
         })
 
+        //mediaPlayer completion listener
         mediaPlayer.setOnCompletionListener {
         if (isRandomPlayingActivated){
             val random = (0 until audioArrayList.size).random()
@@ -291,8 +286,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             binding.musicAuthor.text = audioArrayList[pos].audioArtist
             binding.musicDuration.text = audioArrayList[pos].audioDuration
 
-            //mediaPlayer = MediaPlayer()
-
             mediaPlayer.stop()
             mediaPlayer.reset()
 
@@ -300,8 +293,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
-            //audio_index = pos
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -390,20 +381,12 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
     override fun onBackPressed() {
         super.onBackPressed()
-        //        mediaPlayer = MediaPlayer()
-//        mediaPlayer.release()
+
     }
 
-    //release mediaplayer
+
     override fun onDestroy() {
         super.onDestroy()
-//        mediaPlayer = MediaPlayer()
-//        mediaPlayer.release()
-        //finish()
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-//            notificationManager?.cancelAll()
-//        }
-//        unregisterReceiver(broadcastReceiver)
     }
 
     //checking permission

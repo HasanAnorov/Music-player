@@ -2,18 +2,21 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -21,19 +24,18 @@ import com.example.newdesignmusicplayer.adapter.FolderViewPagerAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
-import java.util.ArrayList
+import java.util.*
 import kotlin.math.abs
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var audioArrayList: ArrayList<ModelAudio>
+
+    companion object {
+        private const val STORAGE_PERMISSION_CODE = 1
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
@@ -56,50 +58,55 @@ class MainActivity : AppCompatActivity() {
 
         binding.cardMenu.elevation = 0F
 
-        checkPermissions()
+        //checking permission
+        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            // Requesting the permission
+            //ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
+            requestStoragePermission()
+        } else {
+            audioArrayList = arrayListOf()
 
-        audioArrayList = arrayListOf()
+            //fetch the audio files from storage
+            val contentResolver = this.contentResolver
+            val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
 
-        //fetch the audio files from storage
-        val contentResolver = this.contentResolver
-        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
-
-        //looping through all rows and adding to list
-        when{
-            cursor == null -> {
-                // query failed, handle error.
-                Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
-            }
-            !cursor.moveToFirst() -> {
-                // no media on the device
-                Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
-            }
-            else ->{
-                //if(cursor.moveToFirst()) {
+            //looping through all rows and adding to list
+            when{
+                cursor == null -> {
+                    // query failed, handle error.
+                    Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+                }
+                !cursor.moveToFirst() -> {
+                    // no media on the device
+                    Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+                }
+                else ->{
+                    //if(cursor.moveToFirst()) {
                     do {
                         val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
                         val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                         val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                         val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                        audioArrayList.add(ModelAudio(id,title,"null",artist,url,false,false))
+                        audioArrayList.add(ModelAudio(id, title, "null", artist, url, false, false))
                     } while (cursor.moveToNext())
-               // }
-                cursor.close()
+                    // }
+                    cursor.close()
+                }
             }
-
         }
 
         //opening clicked playlist
         val adapter = FolderViewPagerAdapter{ model: Folder ->
-            val intent = Intent(this,FolderActivity::class.java)
-            intent.putExtra("folder",model)
+            val intent = Intent(this, FolderActivity::class.java)
+            intent.putExtra("folder", model)
             startActivity(intent)
         }
 
         adapter.differ.submitList(mutableListOf(
-                Folder(R.drawable.ic_thunder,"All songs",audioArrayList),
-                Folder(R.drawable.ic_star,"Favorites",audioArrayList)))
+                Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
+                Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
+        adapter.notifyDataSetChanged()
 
         binding.viewPager.adapter=adapter
 
@@ -118,20 +125,30 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.setPageTransformer(compositePageTransformer)
     }
 
-    //checking permission with dexter
-    private fun checkPermissions() {
-        Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(object : PermissionListener {
-                    override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-                    }
-                    override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {}
-                    override fun onPermissionRationaleShouldBeShown(
-                            permissionRequest: PermissionRequest,
-                            permissionToken: PermissionToken
-                    ) {
-                        // asking for permission
-                        permissionToken.continuePermissionRequest()
-                    }
-                }).check()
+    private fun requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            AlertDialog.Builder(this)
+                    .setTitle("Permission needed")
+                    .setMessage("This permission is needed to read your musics from external storage")
+                    .setPositiveButton("ok") { dialog, which -> ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE) }
+                    .setNegativeButton("cancel") { dialog, which -> dialog.dismiss() }
+                    .create().show()
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

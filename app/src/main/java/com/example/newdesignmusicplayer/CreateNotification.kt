@@ -82,7 +82,7 @@ class CreateNotification {
                     .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0,1,2)
                             .setMediaSession(mediaSessionCompat.sessionToken))
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
                     .build()
 
             notificationManagerCompat.notify(1,notification)

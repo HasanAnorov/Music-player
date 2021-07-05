@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
@@ -31,7 +32,7 @@
         android:textAlignment="center"
         android:ellipsize="end"
         android:layout_height="wrap_content"
-        android:text="Clothes"
+        android:text="@string/clothes"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:fontFamily="sans-serif-condensed"
@@ -39,7 +40,7 @@
         app:layout_constraintTop_toTopOf="@id/back5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="16dp"/>
 
     <TextView
         android:id="@+id/musicAuthor"
@@ -51,8 +52,8 @@
         android:ellipsize="end"
         android:textColor="@color/white"
         android:layout_height="wrap_content"
-        android:text="Calvin Harris"
-        android:textSize="17sp"
+        android:text="@string/calvin_harris"
+        android:textSize="14sp"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         app:layout_constraintTop_toBottomOf="@id/musicName"
@@ -70,7 +71,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:backgroundTint="#181C27"
         app:cardCornerRadius="27dp">
 
@@ -80,7 +81,7 @@
             android:layout_gravity="center"
             android:backgroundTint="@color/white"
             android:background="@drawable/ic_back"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
     </androidx.cardview.widget.CardView>
 
@@ -89,7 +90,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="Now playing"
+        android:text="@string/now_playing"
         android:fontFamily="sans-serif-condensed"
         android:textStyle="bold"
         android:textColor="@color/white"
@@ -99,15 +100,14 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardMusicPhoto"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
-        app:layout_constraintHeight_percent="0.2"
-        app:layout_constraintWidth_percent="0.4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.22"
+        app:layout_constraintWidth_percent="0.386"
         app:cardCornerRadius="45dp"
-        app:layout_constraintVertical_bias="0.08"
+        app:layout_constraintBottom_toTopOf="@id/tv_seekBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/musicAuthor">
 
         <ImageView
@@ -123,6 +123,7 @@
     <SeekBar
         android:id="@+id/tv_seekBar"
         android:layout_width="0dp"
+        app:layout_constraintBottom_toTopOf="@id/btn_play_pause"
         app:layout_constraintStart_toStartOf="@id/back5"
         app:layout_constraintEnd_toEndOf="@id/back5"
         android:layout_marginStart="24dp"
@@ -131,7 +132,7 @@
         android:thumbTint="@color/white"
         android:progressBackgroundTint="#686A76"
         android:layout_height="24dp"
-        app:layout_constraintTop_toBottomOf="@id/cardMusicPhoto"
+        android:layout_marginBottom="48dp"
         android:layout_marginTop="56dp"/>
 
     <TextView
@@ -167,9 +168,10 @@
         android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_seekBar"
+        app:layout_constraintBottom_toBottomOf="@id/back5"
+        android:layout_marginBottom="32dp"
         android:backgroundTint="@color/white"
-        app:cardCornerRadius="34dp">
+        app:cardCornerRadius="30dp">
 
         <ImageView
             android:id="@+id/playPause"
@@ -214,7 +216,7 @@
         android:theme="@style/Theme.MyRipple"
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/cardShuffle"
         android:backgroundTint="#181C27"
@@ -239,7 +241,7 @@
         android:elevation="0dp"
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         app:layout_constraintStart_toEndOf="@id/cardBookmark"
         app:layout_constraintEnd_toStartOf="@+id/cardRepeat"
         android:backgroundTint="#181C27"
@@ -264,7 +266,7 @@
         android:elevation="0dp"
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         app:layout_constraintStart_toEndOf="@id/cardShuffle"
         app:layout_constraintEnd_toStartOf="@+id/cardAddToList"
         android:backgroundTint="#181C27"
@@ -290,7 +292,7 @@
         android:theme="@style/Theme.MyRipple"
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="20dp"
         app:layout_constraintStart_toEndOf="@id/cardRepeat"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="#181C27"
@@ -305,12 +307,5 @@
             android:layout_height="wrap_content"/>
 
     </androidx.cardview.widget.CardView>
-
-
-
-
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
