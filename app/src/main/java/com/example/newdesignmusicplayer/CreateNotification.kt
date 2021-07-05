@@ -9,7 +9,7 @@ import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.newdesignmusicplayer.Services.NotificationService
+import com.example.newdesignmusicplayer.Services.NotificationActionService
 import com.example.newdesignmusicplayer.model.ModelAudio
 
 
@@ -22,44 +22,51 @@ class CreateNotification {
 
     lateinit var notification: Notification
 
-    fun createNotification(context: Context,track:ModelAudio,playButton:Int,position:Int,size:Int){
+    fun createNotification(context: Context,track:ModelAudio,playButton:Int){
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             val notificationManagerCompat = NotificationManagerCompat.from(context)
-            //val mediaSessionCompat :MediaSession = MediaSessionCom(context,"tag")
             val mediaSessionCompat = MediaSessionCompat(context, "tag")
 
-            val icon = BitmapFactory.decodeResource(context.resources,R.drawable.ic_musical_note)
+            val icon = BitmapFactory.decodeResource(context.resources,R.drawable.music_photo)
 
             val pendingIntentPrevious: PendingIntent?
             val drw_previous: Int?
-
-            if (position==0){
-                pendingIntentPrevious = null
-                drw_previous = 0
-            }else{
-                val intentPrevious = Intent(context,NotificationService::class.java)
+//            if (position==0){
+//                pendingIntentPrevious = null
+//                drw_previous = 0
+//            }else{
+                val intentPrevious = Intent(context,NotificationActionService::class.java)
                         .setAction(ACTION_PREVIOUS)
-                pendingIntentPrevious = PendingIntent.getBroadcast(context,0,intentPrevious,PendingIntent.FLAG_UPDATE_CURRENT)
-                drw_previous = R.drawable.ic_previous
-            }
+                pendingIntentPrevious = PendingIntent.getBroadcast(context,
+                    0,
+                    intentPrevious,
+                    PendingIntent.FLAG_UPDATE_CURRENT)
+                drw_previous = R.drawable.ic_baseline_skip_previous_24
+            //}
 
-            val intentPLay = Intent(context,NotificationService::class.java)
+            val intentPLay = Intent(context,NotificationActionService::class.java)
                     .setAction(ACTION_PLAY)
-            val pendingIntentPlay = PendingIntent.getBroadcast(context,0,intentPLay,PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingIntentPlay = PendingIntent.getBroadcast(context,
+                0,
+                intentPLay,
+                PendingIntent.FLAG_UPDATE_CURRENT)
 
 
             val pendingIntentNext: PendingIntent?
             val drw_next: Int?
 
-            if (position==size){
-                pendingIntentNext = null
-                drw_next = 0
-            }else{
-                val intentNext = Intent(context,NotificationService::class.java)
+//            if (position==size){
+//                pendingIntentNext = null
+//                drw_next = 0
+//            }else{
+                val intentNext = Intent(context,NotificationActionService::class.java)
                         .setAction(ACTION_NEXT)
-                pendingIntentNext = PendingIntent.getBroadcast(context,0,intentNext,PendingIntent.FLAG_UPDATE_CURRENT)
-                drw_next = R.drawable.ic_next
-            }
+                pendingIntentNext = PendingIntent.getBroadcast(context,
+                    0,
+                    intentNext,
+                    PendingIntent.FLAG_UPDATE_CURRENT)
+                drw_next = R.drawable.ic_baseline_skip_next_24
+            //}
 
             //create notification
             notification = NotificationCompat.Builder(context,CHANNEL_ID)
@@ -75,7 +82,7 @@ class CreateNotification {
                     .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0,1,2)
                             .setMediaSession(mediaSessionCompat.sessionToken))
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .build()
 
             notificationManagerCompat.notify(1,notification)

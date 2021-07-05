@@ -13,7 +13,7 @@ import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.databinding.MusicItemViewBinding
 import com.example.newdesignmusicplayer.model.ModelAudio
 
-class MusicListAdapter(private val context:Context, val itemClick: (music: ModelAudio, pos: Int) -> Unit): RecyclerView.Adapter<MusicListAdapter.ViewHolderHomeFragment>() {
+class MusicListAdapter(private val context:Context, val itemClick: ( pos: Int) -> Unit): RecyclerView.Adapter<MusicListAdapter.ViewHolderHomeFragment>() {
 
     private val itemCallback = object : DiffUtil.ItemCallback<ModelAudio>(){
         override fun areItemsTheSame(oldItem: ModelAudio, newItem: ModelAudio): Boolean {
@@ -34,7 +34,7 @@ class MusicListAdapter(private val context:Context, val itemClick: (music: Model
             binding.musicAuthor.text = model.audioArtist
 
             binding.root.setOnClickListener {
-                itemClick.invoke(model, position)
+                itemClick.invoke( position)
             }
         }
     }

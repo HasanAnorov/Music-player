@@ -2,6 +2,8 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
@@ -50,7 +52,6 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.statusBarColor = getColor(R.color.white)
             window.navigationBarColor = getColor(R.color.white)
-
         }
 
         binding.cardMenu.elevation = 0F
@@ -89,20 +90,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
-//        if (cursor != null) {
-//            if(cursor.moveToFirst()) {
-//                do {
-//                    val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
-//                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-//                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-//                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-//                    audioArrayList.add(ModelAudio(id,title,"null",artist,url,false,false))
-//                } while (cursor.moveToNext())
-//            }
-//            cursor.close()
-//        }
-
         //opening clicked playlist
         val adapter = FolderViewPagerAdapter{ model: Folder ->
             val intent = Intent(this,FolderActivity::class.java)
@@ -131,8 +118,6 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.setPageTransformer(compositePageTransformer)
     }
 
-
-
     //checking permission with dexter
     private fun checkPermissions() {
         Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -149,5 +134,4 @@ class MainActivity : AppCompatActivity() {
                     }
                 }).check()
     }
-
 }

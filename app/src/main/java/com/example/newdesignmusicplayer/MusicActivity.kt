@@ -1,18 +1,29 @@
 package com.example.newdesignmusicplayer
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.Drawable
 import android.media.AudioAttributes
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.PowerManager
+import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
+import com.example.newdesignmusicplayer.Services.OnClearFromRecentService
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.model.ModelAudio
 import com.karumi.dexter.Dexter
@@ -21,8 +32,10 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import java.io.Serializable
+import java.text.FieldPosition
 
-open class MusicActivity : AppCompatActivity() {
+open class MusicActivity : AppCompatActivity(),Serializable {
 
     private lateinit var binding:ActivityMusicNewBinding
     private lateinit var mediaPlayer: MediaPlayer
@@ -30,6 +43,8 @@ open class MusicActivity : AppCompatActivity() {
     var current_pos = 0.0
     private var total_duration: Double = 0.0
     private var audio_index = 0
+    private var notificationManager: NotificationManager? = null
+
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,21 +65,60 @@ open class MusicActivity : AppCompatActivity() {
         }
 
         val position = intent.getIntExtra("pos", 0)
-
-        //mediaPlayer = MediaPlayer()
-        //mediaPlayer.reset()
-        //mediaPlayer.stop()
-        mediaPlayer = MediaPlayer()
-        mediaPlayer.reset()
-        mediaPlayer.stop()
+        audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
 
         checkPermissions()
-        setAudio(position)
+        setAudio(position,audioArrayList)
+
+        val broadcastReceiver = object :BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val action = intent?.getStringExtra("actionname")
+                //val audioArrayList = intent?.getSerializableExtra("musics") as ArrayList<ModelAudio>
+                when(action){
+                    CreateNotification().ACTION_NEXT -> {
+                        //Toast.makeText(context, "Notification Next", Toast.LENGTH_SHORT).show()
+                        nextAudio(audioArrayList)
+                    }
+                    CreateNotification().ACTION_PLAY ->{
+                        //Toast.makeText(context, "Notification Play", Toast.LENGTH_SHORT).show()
+                        setPause(audioArrayList)
+                    }
+                    CreateNotification().ACTION_PREVIOUS ->{
+                        prevAudio(audioArrayList)
+                        //Toast.makeText(context, "Notification Previous", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+        //creating notification channel
+        if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
+            createChannel()
+            registerReceiver(broadcastReceiver, IntentFilter("TRACKS_TRACKS"))
+            startService(Intent(baseContext, OnClearFromRecentService::class.java))
+        }
+
+        binding.playNext.setOnClickListener {
+            nextAudio(audioArrayList)
+        }
+        binding.playPrevious.setOnClickListener {
+            prevAudio(audioArrayList)
+        }
+        binding.btnPlayPause.setOnClickListener {
+            setPause(audioArrayList)
+        }
 
         binding.btnArrow.setOnClickListener {
            onBackPressed()
         }
+    }
 
+    private fun createChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"AppNameHasan",NotificationManager.IMPORTANCE_LOW)
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(channel)
+        }
     }
 
     //getting audio image
@@ -78,16 +132,15 @@ open class MusicActivity : AppCompatActivity() {
 
     //setting audio files
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun setAudio(pos: Int) {
+    private fun setAudio(pos: Int,audioArrayList:ArrayList<ModelAudio>) {
 
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
-        var isFavorite = false
+        var isFavorite = true
 
-        audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
+        //val audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
 
         mediaPlayer = MediaPlayer()
-
         mediaPlayer.reset()
         mediaPlayer.apply {
             setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
@@ -98,16 +151,8 @@ open class MusicActivity : AppCompatActivity() {
                             .build()
             )
         }
-        //mediaPlayer.release()
+
         audio_index = pos
-
-        //val image = audioArrayList[pos].audioUri?.let { ThumbnailUtils.createAudioThumbnail(it, MediaStore.Images.Thumbnails.MICRO_KIND) }
-        val image = audioArrayList[pos].audioUri?.let { getAlbumArt(it) }
-        if (image!=null){
-            Glide.with(this).asBitmap().load(image).into(binding.musicPhoto)
-        }
-
-
 
         binding.cardShuffle.setOnClickListener {
 
@@ -125,7 +170,9 @@ open class MusicActivity : AppCompatActivity() {
 
             DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
             binding.shuffleIv.background = ivDrawable
-        }else{
+        }
+
+        else{
             DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
             binding.cardShuffle.background = cardDrawable
 
@@ -199,7 +246,9 @@ open class MusicActivity : AppCompatActivity() {
             Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
         }
 
-        //seekbar change listner
+        playAudio(pos,audioArrayList)
+
+        //seekbar change listener
         binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             }
@@ -222,45 +271,41 @@ open class MusicActivity : AppCompatActivity() {
             audio_index++
         }
         if (audio_index < (audioArrayList.size)) {
-            playAudio(audio_index)
+            playAudio(audio_index,audioArrayList)
         } else {
             audio_index = 0
-            playAudio(audio_index)
+            playAudio(audio_index,audioArrayList)
         }
     }
-
-    if (audioArrayList.isNotEmpty()) {
-            playAudio(audio_index)
-            prevAudio()
-            nextAudio()
-            setPause()
-        }
-
 }
 
     //play audio file
-    private fun playAudio(pos: Int) {
+    private fun playAudio(pos: Int,audioArrayList: ArrayList<ModelAudio>) {
         try {
-            mediaPlayer = MediaPlayer()
+            val image = audioArrayList[pos].audioUri?.let { getAlbumArt(it) }
+            if (image!=null){
+                Glide.with(this).asBitmap().load(image).into(binding.musicPhoto)
+            }
+            binding.playPause.setImageResource(R.drawable.ic_pause)
+            binding.musicName.text = audioArrayList[pos].audioTitle
+            binding.musicAuthor.text = audioArrayList[pos].audioArtist
+            binding.musicDuration.text = audioArrayList[pos].audioDuration
 
+            //mediaPlayer = MediaPlayer()
+
+            mediaPlayer.stop()
             mediaPlayer.reset()
+
             //set file path
             mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
-            binding.playPause.setImageResource(R.drawable.ic_pause)
-            //binding.playPause.setBackgroundColor(R.id.white)
-            binding.musicName.text = audioArrayList[pos].audioTitle
-            binding.musicAuthor.text = audioArrayList[pos].audioArtist
-            binding.musicDuration.text = audioArrayList[pos].audioDuration
-            audio_index = pos
+            //audio_index = pos
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         setAudioProgress()
-
     }
 
     //set audio progress
@@ -290,42 +335,42 @@ open class MusicActivity : AppCompatActivity() {
     }
 
     //play previous audio
-    private fun prevAudio() {
-        binding.playPrevious.setOnClickListener {
+    private fun prevAudio(audioArrayList:ArrayList<ModelAudio> ) {
             if (audio_index > 0) {
                 audio_index--
-                playAudio(audio_index)
+                playAudio(audio_index,audioArrayList)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
             } else {
                 audio_index = audioArrayList.size - 1
-                playAudio(audio_index)
+                playAudio(audio_index,audioArrayList)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
             }
-        }
     }
 
     //play next audio
-    private fun nextAudio() {
-        binding.playNext.setOnClickListener {
+    private fun nextAudio(audioArrayList:ArrayList<ModelAudio> ) {
             if (audio_index < audioArrayList.size - 1) {
                 audio_index++
-                playAudio(audio_index)
+                playAudio(audio_index,audioArrayList)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
             } else {
                 audio_index = 0
-                playAudio(audio_index)
+                playAudio(audio_index,audioArrayList)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
             }
-        }
     }
 
     //pause audio
-    private fun setPause() {
-        binding.btnPlayPause.setOnClickListener {
+    private fun setPause(audioArrayList: ArrayList<ModelAudio>) {
             if (mediaPlayer.isPlaying) {
                 mediaPlayer.pause()
                 binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
             } else {
                 mediaPlayer.start()
                 binding.playPause.setImageResource(R.drawable.ic_pause)
+                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
             }
-        }
     }
 
     //time conversion
@@ -343,12 +388,22 @@ open class MusicActivity : AppCompatActivity() {
         return audioTime
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        //        mediaPlayer = MediaPlayer()
+//        mediaPlayer.release()
+    }
+
     //release mediaplayer
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer = MediaPlayer()
-        mediaPlayer.release()
+//        mediaPlayer = MediaPlayer()
+//        mediaPlayer.release()
         //finish()
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//            notificationManager?.cancelAll()
+//        }
+//        unregisterReceiver(broadcastReceiver)
     }
 
     //checking permission
