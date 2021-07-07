@@ -25,12 +25,14 @@ import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var adapter: FolderViewPagerAdapter
     private lateinit var audioArrayList: ArrayList<ModelAudio>
 
     companion object {
@@ -58,46 +60,29 @@ class MainActivity : AppCompatActivity() {
 
         binding.cardMenu.elevation = 0F
 
+        audioArrayList = arrayListOf()
+
         //checking permission
         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
-            //ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
-            requestStoragePermission()
+            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
         } else {
-            audioArrayList = arrayListOf()
-
-            //fetch the audio files from storage
-            val contentResolver = this.contentResolver
-            val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-            val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
-
-            //looping through all rows and adding to list
-            when{
-                cursor == null -> {
-                    // query failed, handle error.
-                    Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
-                }
-                !cursor.moveToFirst() -> {
-                    // no media on the device
-                    Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
-                }
-                else ->{
-                    //if(cursor.moveToFirst()) {
-                    do {
-                        val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
-                        val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                        val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                        val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                        audioArrayList.add(ModelAudio(id, title, "null", artist, url, false, false))
-                    } while (cursor.moveToNext())
-                    // }
-                    cursor.close()
-                }
-            }
+            audioArrayList = fetchAudioFiles()
+//            //opening clicked playlist
+//            adapter = FolderViewPagerAdapter{ model: Folder ->
+//                val intent = Intent(this, FolderActivity::class.java)
+//                intent.putExtra("folder", model)
+//                startActivity(intent)
+//            }
+//
+//            adapter.differ.submitList(mutableListOf(
+//                    Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
+//                    Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
+//            binding.viewPager.adapter=adapter
         }
 
         //opening clicked playlist
-        val adapter = FolderViewPagerAdapter{ model: Folder ->
+        adapter = FolderViewPagerAdapter{ model: Folder ->
             val intent = Intent(this, FolderActivity::class.java)
             intent.putExtra("folder", model)
             startActivity(intent)
@@ -106,8 +91,6 @@ class MainActivity : AppCompatActivity() {
         adapter.differ.submitList(mutableListOf(
                 Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
                 Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
-        adapter.notifyDataSetChanged()
-
         binding.viewPager.adapter=adapter
 
         binding.viewPager.clipToPadding = false
@@ -121,21 +104,39 @@ class MainActivity : AppCompatActivity() {
             val r = 1 - abs(position)
             page.scaleY = 0.85f + r * 0.15f
         }
-
         binding.viewPager.setPageTransformer(compositePageTransformer)
     }
 
-    private fun requestStoragePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            AlertDialog.Builder(this)
-                    .setTitle("Permission needed")
-                    .setMessage("This permission is needed to read your musics from external storage")
-                    .setPositiveButton("ok") { dialog, which -> ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE) }
-                    .setNegativeButton("cancel") { dialog, which -> dialog.dismiss() }
-                    .create().show()
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
+    private fun fetchAudioFiles():ArrayList<ModelAudio>{
+        //fetch the audio files from storage
+        val contentResolver = this.contentResolver
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
+        val returningFiles = ArrayList<ModelAudio>()
+
+        //looping through all rows and adding to list
+        when{
+            cursor == null -> {
+                // query failed, handle error.
+                Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            !cursor.moveToFirst() -> {
+                // no media on the device
+                Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            else ->{
+                do {
+                    val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    returningFiles.add(ModelAudio(id, title, "null", artist, url, false, false))
+                } while (cursor.moveToNext())
+                cursor.close()
+                return  returningFiles
+            }
         }
     }
 
@@ -145,6 +146,19 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                audioArrayList = fetchAudioFiles()
+
+                adapter = FolderViewPagerAdapter{ model: Folder ->
+                    val intent = Intent(this, FolderActivity::class.java)
+                    intent.putExtra("folder", model)
+                    startActivity(intent)
+                }
+                adapter.differ.submitList(mutableListOf(
+                        Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
+                        Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
+                binding.viewPager.adapter=adapter
+
                 Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()

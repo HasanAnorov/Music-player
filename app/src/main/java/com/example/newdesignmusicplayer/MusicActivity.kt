@@ -73,7 +73,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         val broadcastReceiver = object :BroadcastReceiver(){
             override fun onReceive(context: Context?, intent: Intent?) {
                 val action = intent?.getStringExtra("actionname")
-                //val audioArrayList = intent?.getSerializableExtra("musics") as ArrayList<ModelAudio>
                 when(action){
                     CreateNotification().ACTION_NEXT -> {
                         //Toast.makeText(context, "Notification Next", Toast.LENGTH_SHORT).show()
@@ -98,9 +97,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             startService(Intent(baseContext, OnClearFromRecentService::class.java))
         }
 
-        Toast.makeText(this, "make notification", Toast.LENGTH_SHORT).show()
-        CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-
         binding.playNext.setOnClickListener {
             nextAudio(audioArrayList)
         }
@@ -110,15 +106,17 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         binding.btnPlayPause.setOnClickListener {
             setPause(audioArrayList)
         }
-
         binding.btnArrow.setOnClickListener {
-           onBackPressed()
+            onBackPressed()
         }
     }
 
+    //creating channel
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"HasanMusic",NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"AppNameHasan",NotificationManager.IMPORTANCE_LOW).apply {
+                setShowBadge(false)
+            }
             notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager?.createNotificationChannel(channel)
         }
@@ -140,9 +138,8 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
         var isFavorite = true
-        audio_index = pos
 
-        playAudio(pos,audioArrayList)
+        audio_index = pos
 
         mediaPlayer = MediaPlayer()
         mediaPlayer.reset()
@@ -158,34 +155,35 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         binding.cardShuffle.setOnClickListener {
 
-        isRandomPlayingActivated =!isRandomPlayingActivated
+            isRandomPlayingActivated =!isRandomPlayingActivated
 
-        var cardDrawable: Drawable = binding.cardShuffle.background
-        cardDrawable = DrawableCompat.wrap(cardDrawable)
-        var ivDrawable = binding.shuffleIv.background
-        ivDrawable = DrawableCompat.wrap(ivDrawable)
+            var cardDrawable: Drawable = binding.cardShuffle.background
+            cardDrawable = DrawableCompat.wrap(cardDrawable)
+            var ivDrawable = binding.shuffleIv.background
+            ivDrawable = DrawableCompat.wrap(ivDrawable)
 
-        if(isRandomPlayingActivated) {
+            if(isRandomPlayingActivated) {
 
-            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-            binding.cardShuffle.background = cardDrawable
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+                binding.cardShuffle.background = cardDrawable
 
-            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
-            binding.shuffleIv.background = ivDrawable
+                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+                binding.shuffleIv.background = ivDrawable
+            }
+
+            else{
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+                binding.cardShuffle.background = cardDrawable
+
+                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+                binding.shuffleIv.background = ivDrawable
+            }
+
+            Toast.makeText(this, "shuffle", Toast.LENGTH_SHORT).show()
+            if (isRepeatActivated){
+                isRepeatActivated = false
+            }
         }
-
-        else{
-            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-            binding.cardShuffle.background = cardDrawable
-
-            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
-            binding.shuffleIv.background = ivDrawable
-        }
-
-        if (isRepeatActivated){
-            isRepeatActivated = false
-        }
-    }
 
         binding.cardBookmark.setOnClickListener {
 
@@ -193,6 +191,9 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
             var cardDrawable: Drawable = binding.cardBookmark.background
             cardDrawable = DrawableCompat.wrap(cardDrawable)
+
+            var ivDrawable = binding.bookmarkIv.background
+            ivDrawable = DrawableCompat.wrap(ivDrawable)
 
             if(isFavorite){
                 DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
@@ -211,36 +212,41 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         binding.cardRepeat.setOnClickListener{
 
-        isRepeatActivated = !isRepeatActivated
+            isRepeatActivated = !isRepeatActivated
 
-        var cardDrawable: Drawable = binding.cardRepeat.background
-        cardDrawable = DrawableCompat.wrap(cardDrawable)
+            var cardDrawable: Drawable = binding.cardRepeat.background
+            cardDrawable = DrawableCompat.wrap(cardDrawable)
 
-        var ivDrawable = binding.repeatIv.background
-        ivDrawable = DrawableCompat.wrap(ivDrawable)
+            var ivDrawable = binding.repeatIv.background
+            ivDrawable = DrawableCompat.wrap(ivDrawable)
 
-        if(isRepeatActivated){
-            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-            binding.cardRepeat.background = cardDrawable
+            if(isRepeatActivated){
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+                binding.cardRepeat.background = cardDrawable
 
-            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
-            binding.repeatIv.background = ivDrawable
-        }else{
-            DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-            binding.cardRepeat.background = cardDrawable
+                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+                binding.repeatIv.background = ivDrawable
+            }else{
+                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+                binding.cardRepeat.background = cardDrawable
 
-            DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
-            binding.repeatIv.background = ivDrawable
+                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+                binding.repeatIv.background = ivDrawable
+            }
+
+            Toast.makeText(this, "repeat", Toast.LENGTH_SHORT).show()
+
+            if (isRandomPlayingActivated){
+                isRandomPlayingActivated = false
+            }
         }
-
-        if (isRandomPlayingActivated){
-            isRandomPlayingActivated = false
-        }
-    }
 
         binding.cardAddToList.setOnClickListener {
             Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
         }
+
+
+        playAudio(pos,audioArrayList)
 
         //seekbar change listener
         binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -256,23 +262,22 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             }
         })
 
-        //mediaPlayer completion listener
         mediaPlayer.setOnCompletionListener {
-        if (isRandomPlayingActivated){
-            val random = (0 until audioArrayList.size).random()
-            audio_index = random
-        }
-        if (!isRandomPlayingActivated && !isRepeatActivated){
-            audio_index++
-        }
-        if (audio_index < (audioArrayList.size)) {
-            playAudio(audio_index,audioArrayList)
-        } else {
-            audio_index = 0
-            playAudio(audio_index,audioArrayList)
+            if (isRandomPlayingActivated){
+                val random = (0 until audioArrayList.size).random()
+                audio_index = random
+            }
+            if (!isRandomPlayingActivated && !isRepeatActivated){
+                audio_index++
+            }
+            if (audio_index < (audioArrayList.size)) {
+                playAudio(audio_index,audioArrayList)
+            } else {
+                audio_index = 0
+                playAudio(audio_index,audioArrayList)
+            }
         }
     }
-}
 
     //play audio file
     private fun playAudio(pos: Int,audioArrayList: ArrayList<ModelAudio>) {
@@ -290,9 +295,11 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             mediaPlayer.reset()
 
             //set file path
+            CreateNotification().createNotification(this,audioArrayList[pos],R.drawable.ic_pause)
             mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -327,41 +334,41 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
     //play previous audio
     private fun prevAudio(audioArrayList:ArrayList<ModelAudio> ) {
-            if (audio_index > 0) {
-                audio_index--
-                playAudio(audio_index,audioArrayList)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-            } else {
-                audio_index = audioArrayList.size - 1
-                playAudio(audio_index,audioArrayList)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-            }
+        if (audio_index > 0) {
+            audio_index--
+            playAudio(audio_index,audioArrayList)
+           // CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+        } else {
+            audio_index = audioArrayList.size - 1
+            playAudio(audio_index,audioArrayList)
+            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+        }
     }
 
     //play next audio
     private fun nextAudio(audioArrayList:ArrayList<ModelAudio> ) {
-            if (audio_index < audioArrayList.size - 1) {
-                audio_index++
-                playAudio(audio_index,audioArrayList)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-            } else {
-                audio_index = 0
-                playAudio(audio_index,audioArrayList)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-            }
+        if (audio_index < audioArrayList.size - 1) {
+            audio_index++
+            playAudio(audio_index,audioArrayList)
+            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+        } else {
+            audio_index = 0
+            playAudio(audio_index,audioArrayList)
+            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+        }
     }
 
     //pause audio
     private fun setPause(audioArrayList: ArrayList<ModelAudio>) {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
-            } else {
-                mediaPlayer.start()
-                binding.playPause.setImageResource(R.drawable.ic_pause)
-                CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
-            }
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+            binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
+            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
+        } else {
+            mediaPlayer.start()
+            binding.playPause.setImageResource(R.drawable.ic_pause)
+            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+        }
     }
 
     //time conversion
@@ -381,12 +388,12 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
     override fun onBackPressed() {
         super.onBackPressed()
-
     }
 
-
+    //release mediaplayer
     override fun onDestroy() {
         super.onDestroy()
+
     }
 
     //checking permission

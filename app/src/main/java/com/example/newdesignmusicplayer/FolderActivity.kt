@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
@@ -74,9 +75,7 @@ class FolderActivity : AppCompatActivity(),Serializable {
         binding.recyclerView.adapter = adapter
 
         binding.btnArrow.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
+            onBackPressed()
         }
     }
 
@@ -91,6 +90,9 @@ class FolderActivity : AppCompatActivity(),Serializable {
         }
          musicList = myFiles
          adapter.differ.submitList(myFiles)
+    }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
     }
 }
