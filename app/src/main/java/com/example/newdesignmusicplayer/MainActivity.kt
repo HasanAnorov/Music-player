@@ -3,18 +3,23 @@ package com.example.newdesignmusicplayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.View
+import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -47,6 +52,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        audioArrayList = arrayListOf()
+
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility =(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or  View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
@@ -54,13 +61,9 @@ class MainActivity : AppCompatActivity() {
 
         //status bar color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.statusBarColor = getColor(R.color.white)
+            window.statusBarColor = getColor(R.color.main_light)
             window.navigationBarColor = getColor(R.color.white)
         }
-
-        binding.cardMenu.elevation = 0F
-
-        audioArrayList = arrayListOf()
 
         //checking permission
         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
@@ -68,17 +71,6 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
         } else {
             audioArrayList = fetchAudioFiles()
-//            //opening clicked playlist
-//            adapter = FolderViewPagerAdapter{ model: Folder ->
-//                val intent = Intent(this, FolderActivity::class.java)
-//                intent.putExtra("folder", model)
-//                startActivity(intent)
-//            }
-//
-//            adapter.differ.submitList(mutableListOf(
-//                    Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
-//                    Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
-//            binding.viewPager.adapter=adapter
         }
 
         //opening clicked playlist
@@ -88,9 +80,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        adapter.differ.submitList(mutableListOf(
+        val folderList = mutableListOf<Folder>(
                 Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
-                Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
+                Folder(R.drawable.ic_star, "Favorites", audioArrayList))
+
+
+        addFolder(folderList)
         binding.viewPager.adapter=adapter
 
         binding.viewPager.clipToPadding = false
@@ -105,7 +100,43 @@ class MainActivity : AppCompatActivity() {
             page.scaleY = 0.85f + r * 0.15f
         }
         binding.viewPager.setPageTransformer(compositePageTransformer)
+
+        binding.cardMenu.setOnClickListener {
+
+            val dialog = AlertDialog.Builder(this).create()
+            val dialogView = layoutInflater.inflate(R.layout.adding_folder_dialog, binding.root, false)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.setView(dialogView)
+
+            val ok = dialogView.findViewById<CardView>(R.id.yes)
+            val no = dialogView.findViewById<CardView>(R.id.no)
+            val et = dialogView.findViewById<EditText>(R.id.et_folder)
+
+            et.requestFocus()
+            et.isFocusableInTouchMode = true
+
+            dialog.show()
+
+            no.setOnClickListener {
+                dialog.dismiss()
+            }
+            ok.setOnClickListener {
+                val folderName = et.text
+                val newFolder = Folder(R.drawable.ic_thunder,folderName.toString(),audioArrayList)
+                folderList.add(folderList.size,newFolder)
+                addFolder(folderList)
+                dialog.dismiss()
+            }
+
+        }
+
     }
+
+    private fun addFolder(list: MutableList<Folder>){
+        adapter.differ.submitList(list)
+        //adapter.notifyItemInserted(adapter.differ.currentList.size)
+    }
+
 
     private fun fetchAudioFiles():ArrayList<ModelAudio>{
         //fetch the audio files from storage

@@ -6,4 +6,7 @@
     <string name="clothes">Clothes</string>
     <string name="ambient">Ambient</string>
     <string name="now_playing">Now playing</string>
+    <string name="hello_dear">Hello, Dear</string>
+    <string name="top_tracks">Top Tracks :</string>
+    <string name="remove">Remove</string>
 </resources>

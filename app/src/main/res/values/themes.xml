@@ -14,6 +14,10 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="Widget.MPM.Menu.Dark.CustomBackground">
+        <item name="android:popupBackground">@drawable/popup</item>
+    </style>
+
     <style name="Theme.MyRipple" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="colorControlHighlight">@color/shuffleColor</item>
         <item name="android:background">?selectableItemBackgroundBorderless</item>

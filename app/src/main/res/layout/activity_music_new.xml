@@ -16,7 +16,7 @@
         android:alpha="1"
         app:layout_constraintBottom_toTopOf="@id/cardBookmark"
         app:layout_constraintTop_toBottomOf="@id/btn_arrow"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="42dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
@@ -85,18 +85,6 @@
 
     </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/now_playing"
-        android:fontFamily="sans-serif-condensed"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        app:layout_constraintTop_toTopOf="@id/btn_arrow"
-        app:layout_constraintBottom_toBottomOf="@id/btn_arrow"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardMusicPhoto"
@@ -225,6 +213,7 @@
         <ImageView
             android:id="@+id/bookmark_iv"
             android:focusable="false"
+            android:background="#ffffff"
             android:layout_width="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/ic_heart__6_"

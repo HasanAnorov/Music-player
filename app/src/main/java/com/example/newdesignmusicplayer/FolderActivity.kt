@@ -5,19 +5,24 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.withStarted
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
+import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
 
-class FolderActivity : AppCompatActivity(),Serializable {
+class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
@@ -61,7 +66,7 @@ class FolderActivity : AppCompatActivity(),Serializable {
             }
         })
 
-            adapter =MusicListAdapter(this){  position: Int ->
+            adapter =MusicListAdapter(this,this){  position: Int ->
 
             val intent = Intent(this, MusicActivity::class.java)
             intent.putExtra("musics", musicList)
@@ -79,7 +84,7 @@ class FolderActivity : AppCompatActivity(),Serializable {
         }
     }
 
-     fun onQueryTextChange(newText: String){
+    fun onQueryTextChange(newText: String){
         val folder = intent.getSerializableExtra("folder") as Folder
         val userInput = newText.toLowerCase(Locale.ROOT)
         val myFiles = ArrayList<ModelAudio>()
@@ -92,7 +97,32 @@ class FolderActivity : AppCompatActivity(),Serializable {
          adapter.differ.submitList(myFiles)
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
+    override fun onMenuItemClick(model: ModelAudio, position: Int,view:View) {
+        val popupMenu = popupMenu {
+            style = R.style.Widget_MPM_Menu_Dark_CustomBackground
+            section {
+                item {
+                    label = "Add to"
+                    labelColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
+                    icon = R.drawable.ic_add__4_ //optional
+                    iconColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
+                    callback = { //optional
+                        Toast.makeText(this@FolderActivity, "Copied!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                item {
+                    labelRes = R.string.remove
+                    labelColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
+                    iconDrawable = ContextCompat.getDrawable(this@FolderActivity, R.drawable.ic_trash) //optional
+                    iconColor =ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
+                    callback = { //optional
+                        Toast.makeText(this@FolderActivity, "Text pasted!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            }
+        }
+        popupMenu.show(this, view)
     }
+
 }

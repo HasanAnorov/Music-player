@@ -25,16 +25,14 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder) ->Unit): RecyclerVie
 
     val differ = AsyncListDiffer(this,itemCallback)
 
+    fun addFolder(){
+
+    }
+
     inner class ViewHolderHomeFragment(private  var binding:ViewPagerItemViewBinding): RecyclerView.ViewHolder(binding.root){
         fun onBind(model: Folder){
             binding.folderName.text = model.folderName
 
-//            model.musicPhoto.let {
-//                Picasso.get().load(it)
-//                        .fit()
-//                        .centerCrop()
-//                        .into(binding.ivPhoto)
-//            }
             binding.root.setOnClickListener {
                 itemClick.invoke(model)
             }
