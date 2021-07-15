@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/sherCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="18dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/shape"
+            android:background="@color/white"
+            android:alpha="0.6"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.cardview.widget.CardView
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:backgroundTint="#EDEDED"
+                android:id="@+id/yes"
+                app:layout_constraintEnd_toStartOf="@id/no"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                app:cardCornerRadius="12dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textInputLayout"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="16dp">
+
+                <ImageView
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:background="@drawable/ic_check__1_"
+                    android:layout_gravity="center"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:focusable="true"
+                android:clickable="true"
+                android:id="@+id/no"
+                app:layout_constraintStart_toEndOf="@id/yes"
+                android:backgroundTint="#EDEDED"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textInputLayout"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginStart="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:cardCornerRadius="12dp">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:layout_height="14dp"
+                    android:background="@drawable/ic_close__1_"
+                    android:layout_gravity="center" />
+
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/sherHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="Change playlist name"
+                android:textStyle="normal"
+                android:fontFamily="sans-serif-condensed"
+                android:textAlignment="center"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:padding="2dp"
+                android:layout_marginTop="22dp"
+                android:textSize="18sp"
+                android:textColor="@color/black"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="New name"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                app:helperText="Required"
+                app:counterEnabled="true"
+                app:counterMaxLength="25"
+                app:errorEnabled="true"
+                app:errorIconDrawable="@drawable/ic_baseline_error_24"
+                app:endIconMode="clear_text"
+                app:helperTextTextColor="@color/purple_700"
+                android:layout_marginTop="24dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:layout_constraintTop_toBottomOf="@id/sherHeading">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/textInputEditText"
+                    android:maxLines="1"
+                    android:maxLength="25"
+                    android:inputType="text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

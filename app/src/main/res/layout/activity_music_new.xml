@@ -213,7 +213,6 @@
         <ImageView
             android:id="@+id/bookmark_iv"
             android:focusable="false"
-            android:background="#ffffff"
             android:layout_width="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/ic_heart__6_"

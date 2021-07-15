@@ -296,7 +296,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             mediaPlayer.reset()
 
             //set file path
-            CreateNotification().createNotification(this,audioArrayList[pos],R.drawable.ic_pause,timerConversion(mediaPlayer.currentPosition.toLong()).toLong())
+            CreateNotification().createNotification(this,audioArrayList[pos],R.drawable.ic_pause)
             mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
@@ -364,12 +364,12 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
-            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead,timerConversion(mediaPlayer.currentPosition.toLong()).toLong())
+            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
             //Toast.makeText(this, audioArrayList[audio_index].audioDuration, Toast.LENGTH_SHORT).show()
         } else {
             mediaPlayer.start()
             binding.playPause.setImageResource(R.drawable.ic_pause)
-            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause,timerConversion(mediaPlayer.currentPosition.toLong()).toLong())
+            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
         }
     }
 
@@ -395,7 +395,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     //release mediaplayer
     override fun onDestroy() {
         super.onDestroy()
-
     }
 
     //checking permission

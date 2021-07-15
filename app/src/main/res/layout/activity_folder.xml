@@ -125,16 +125,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_card" />
 
-    <ImageView
-        android:id="@+id/folder_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_thunder"
-        android:backgroundTint="@color/white"
-        android:windowSoftInputMode="adjustNothing"
-        app:layout_constraintBottom_toBottomOf="@id/tv_folder_name"
-        app:layout_constraintStart_toStartOf="@id/btn_arrow"
-        app:layout_constraintTop_toTopOf="@id/tv_folder_name" />
+
 
     <TextView
         android:id="@+id/textView"

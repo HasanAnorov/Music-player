@@ -106,8 +106,9 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
                     labelColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
                     icon = R.drawable.ic_add__4_ //optional
                     iconColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
-                    callback = { //optional
-                        Toast.makeText(this@FolderActivity, "Copied!", Toast.LENGTH_SHORT).show()
+                    callback = {
+                        //Do something to move!
+                        Toast.makeText(this@FolderActivity, "Do something to move!", Toast.LENGTH_SHORT).show()
                     }
                 }
                 item {
@@ -115,11 +116,11 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
                     labelColor = ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
                     iconDrawable = ContextCompat.getDrawable(this@FolderActivity, R.drawable.ic_trash) //optional
                     iconColor =ContextCompat.getColor(this@FolderActivity,R.color.folderActivity)
-                    callback = { //optional
-                        Toast.makeText(this@FolderActivity, "Text pasted!", Toast.LENGTH_SHORT).show()
+                    callback = {
+                        //Do something to remove folder!
+                        Toast.makeText(this@FolderActivity, "Do something to remove folder!", Toast.LENGTH_SHORT).show()
                     }
                 }
-
             }
         }
         popupMenu.show(this, view)

@@ -27,7 +27,7 @@ class CreateNotification {
 
     lateinit var notification: Notification
 
-    fun createNotification(context: Context,track:ModelAudio,playButton:Int,duration:Long){
+    fun createNotification(context: Context,track:ModelAudio,playButton:Int){
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             val notificationManagerCompat = NotificationManagerCompat.from(context)
             val mediaSessionCompat = MediaSessionCompat(context, "Player service")
@@ -36,7 +36,6 @@ class CreateNotification {
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,track.audioArtist)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION,3L)
                     .build())
-            Toast.makeText(context,duration.toString(),Toast.LENGTH_SHORT).show()
 //            if (track.audioDuration ==null){
 //                Toast.makeText(context, "null", Toast.LENGTH_SHORT).show()
 //            }else{
