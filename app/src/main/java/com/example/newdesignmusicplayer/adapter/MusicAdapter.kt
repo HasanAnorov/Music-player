@@ -29,11 +29,6 @@ class MusicListAdapter(private val context:Context,val listener:OnEvenListener, 
 
     var differ = AsyncListDiffer(this, itemCallback)
 
-    fun updateList(newList:ArrayList<ModelAudio>){
-        differ.submitList(newList)
-
-    }
-
     inner class ViewHolderHomeFragment(private var binding: MusicItemViewBinding): RecyclerView.ViewHolder(binding.root){
         fun onBind(model: ModelAudio, position: Int){
 
@@ -42,19 +37,7 @@ class MusicListAdapter(private val context:Context,val listener:OnEvenListener, 
             binding.cardMenu.elevation = 0F
 
             binding.cardMenu.setOnClickListener {
-
-            }
-
-            binding.cardMenu.setOnClickListener {
-                listener.onMenuItemClick(model,position,binding.cardMenu
-
-
-
-
-
-
-
-                )
+                listener.onMenuItemClick(model,position,binding.cardMenu)
             }
             binding.root.setOnClickListener {
                 itemClick.invoke( position)
@@ -72,22 +55,20 @@ class MusicListAdapter(private val context:Context,val listener:OnEvenListener, 
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
         holder.onBind(differ.currentList[position], position)
-        holder.itemView.findViewById<CardView>(R.id.menu)
+
         val image = differ.currentList[position].audioUri?.let {
             getAlbumArt(it)
         }
         if (image!=null){
             Glide.with(context).asBitmap().load(image).into(holder.itemView.findViewById(R.id.onGoingMusicImage))
         }
-
     }
 
-    fun getAlbumArt(uri: String): ByteArray? {
+    private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(uri)
         val art = retriever.embeddedPicture
         retriever.release()
         return art
     }
-
 }

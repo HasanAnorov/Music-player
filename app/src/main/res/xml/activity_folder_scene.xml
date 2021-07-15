@@ -72,12 +72,12 @@
             android:layout_marginBottom="0dp" />
         <Constraint
             motion:layout_constraintEnd_toEndOf="parent"
-            motion:layout_constraintStart_toEndOf="@id/folder_icon"
+            motion:layout_constraintStart_toEndOf="@id/btn_arrow"
             android:layout_width="0dp"
             android:layout_height="48dp"
             motion:layout_constraintBottom_toBottomOf="@id/btn_arrow"
             android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             motion:layout_constraintTop_toTopOf="@id/btn_arrow"
             android:id="@+id/search_card" />
     </ConstraintSet>
