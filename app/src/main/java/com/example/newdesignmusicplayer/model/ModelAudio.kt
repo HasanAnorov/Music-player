@@ -2,56 +2,26 @@ package com.example.newdesignmusicplayer.model
 
 import java.io.Serializable
 
-//class ModelAudio(
-//    var audioTitle: String? = null,
-//    var audioDuration: String? = null,
-//    var audioArtist: String? = null,
-//    var audioUri: String? = null
-//
-//):Serializable
+class ModelAudio:Serializable{
 
-class ModelAudio():Serializable{
-
+    var id :String? = null
     var audioTitle: String? = null
     var audioDuration: String? = null
     var audioArtist: String? = null
     var audioUri: String? = null
-    var audioPhoto :String? = null
+    var isPlaying:Boolean = false
+    var isFavorite:Boolean = false
 
+    constructor()
 
-    fun getaudioTitle(): String? {
-        return audioTitle
-    }
-
-    fun setaudioTitle(audioTitle: String?) {
+    constructor(id: String?, audioTitle: String?, audioDuration: String?, audioArtist: String?, audioUri: String?, isPlaying: Boolean, isFavorite: Boolean) {
+        this.id = id
         this.audioTitle = audioTitle
-    }
-
-    fun getaudioDuration(): String? {
-        return audioDuration
-    }
-
-    fun setPhoto(audioPhoto:String?){
-        this.audioPhoto = audioPhoto
-    }
-
-    fun setaudioDuration(audioDuration: String?) {
         this.audioDuration = audioDuration
-    }
-
-    fun getaudioArtist(): String? {
-        return audioArtist
-    }
-
-    fun setaudioArtist(audioArtist: String?) {
         this.audioArtist = audioArtist
-    }
-
-    fun getaudioUri(): String? {
-        return audioUri
-    }
-
-    fun setaudioUri(audioUri: String) {
         this.audioUri = audioUri
+        this.isPlaying = isPlaying
+        this.isFavorite = isFavorite
     }
+
 }

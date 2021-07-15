@@ -9,7 +9,7 @@ import com.example.newdesignmusicplayer.databinding.ViewPagerItemViewBinding
 import com.example.newdesignmusicplayer.model.Folder
 
 
-class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>() {
+class FolderViewPagerAdapter(val itemClick:(folder: Folder) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>() {
 
     private val itemCallback = object : DiffUtil.ItemCallback<Folder>(){
         override fun areItemsTheSame(oldItem: Folder, newItem: Folder): Boolean {
@@ -25,18 +25,16 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): Re
 
     val differ = AsyncListDiffer(this,itemCallback)
 
+    fun addFolder(){
+
+    }
+
     inner class ViewHolderHomeFragment(private  var binding:ViewPagerItemViewBinding): RecyclerView.ViewHolder(binding.root){
-        fun onBind(model: Folder, position: Int){
+        fun onBind(model: Folder){
             binding.folderName.text = model.folderName
 
-//            model.musicPhoto.let {
-//                Picasso.get().load(it)
-//                        .fit()
-//                        .centerCrop()
-//                        .into(binding.ivPhoto)
-//            }
             binding.root.setOnClickListener {
-                itemClick.invoke(model,position)
+                itemClick.invoke(model)
             }
         }
     }
@@ -50,9 +48,6 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): Re
     override fun getItemCount(): Int = differ.currentList.size
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
-        holder.onBind(differ.currentList[position],position)
+        holder.onBind(differ.currentList[position])
     }
-
-
-
 }

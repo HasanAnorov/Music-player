@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetEnd="@+id/end"
+        motion:constraintSetStart="@id/start"
+        motion:duration="1000">
+       <KeyFrameSet>
+
+           <KeyAttribute
+               motion:motionTarget="@+id/tv_folder_name"
+               motion:framePosition="100"
+               android:alpha="0" />
+           <KeyAttribute
+               motion:motionTarget="@+id/textView"
+               motion:framePosition="100"
+               android:alpha="0" />
+       </KeyFrameSet>
+        <OnSwipe motion:touchAnchorId="@+id/whiteBack" />
+    </Transition>
+
+    <ConstraintSet android:id="@+id/start">
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/end">
+        <Constraint
+            android:id="@+id/whiteBack"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintHeight_percent="0"
+            motion:layout_constraintTop_toBottomOf="@id/search_card"
+            android:layout_marginTop="16dp" />
+        <Constraint
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            motion:layout_constraintTop_toBottomOf="@id/search_card"
+            android:id="@+id/tv_folder_name"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            motion:layout_constraintStart_toStartOf="@id/search_card" />
+        <Constraint
+            android:layout_height="wrap_content"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:id="@+id/textView"
+            android:layout_marginEnd="8dp"
+            motion:layout_constraintStart_toEndOf="@id/tv_folder_name"
+            android:layout_marginStart="8dp"
+            motion:layout_editor_absoluteY="57dp"
+            motion:layout_constraintTop_toTopOf="@id/tv_folder_name"
+            motion:layout_constraintBottom_toBottomOf="@id/tv_folder_name" />
+        <Constraint
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="24dp"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="24dp"
+            android:id="@+id/btn_arrow" />
+        <Constraint
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="@id/btn_arrow"
+            motion:layout_constraintTop_toTopOf="@id/btn_arrow"
+            android:id="@+id/folder_icon"
+            motion:layout_constraintStart_toEndOf="@id/btn_arrow"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp" />
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toEndOf="@id/folder_icon"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            motion:layout_constraintBottom_toBottomOf="@id/btn_arrow"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            motion:layout_constraintTop_toTopOf="@id/btn_arrow"
+            android:id="@+id/search_card" />
+    </ConstraintSet>
+</MotionScene>

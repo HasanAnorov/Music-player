@@ -2,12 +2,26 @@ package com.example.newdesignmusicplayer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -15,20 +29,22 @@ import com.example.newdesignmusicplayer.adapter.FolderViewPagerAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
-import java.util.ArrayList
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var adapter: FolderViewPagerAdapter
     private lateinit var audioArrayList: ArrayList<ModelAudio>
 
+    companion object {
+        private const val STORAGE_PERMISSION_CODE = 1
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,44 +52,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
-        checkPermissions()
         audioArrayList = arrayListOf()
 
-        //fetch the audio files from storage
-        val contentResolver = this.contentResolver
-        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
-
-        //looping through all rows and adding to list
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                val duration: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-                val photo: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
-                val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                val modelAudio = ModelAudio()
-                modelAudio.setaudioTitle(title)
-                modelAudio.setaudioArtist(artist)
-                modelAudio.setaudioUri(url)
-                modelAudio.setaudioDuration(duration)
-                modelAudio.setPhoto(photo)
-                audioArrayList.add(modelAudio)
-            } while (cursor.moveToNext())
+        // status bar text color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility =(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or  View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
 
-        val adapter = FolderViewPagerAdapter{ model: Folder, position: Int ->
-            val intent = Intent(this,FolderActivity::class.java)
-            intent.putExtra("folder",model)
+        //status bar color
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.statusBarColor = getColor(R.color.main_light)
+            window.navigationBarColor = getColor(R.color.white)
+        }
+
+        //checking permission
+        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            // Requesting the permission
+            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
+        } else {
+            audioArrayList = fetchAudioFiles()
+        }
+
+        //opening clicked playlist
+        adapter = FolderViewPagerAdapter{ model: Folder ->
+            val intent = Intent(this, FolderActivity::class.java)
+            intent.putExtra("folder", model)
             startActivity(intent)
         }
 
-        adapter.differ.submitList(mutableListOf(
-                Folder(R.drawable.ic_thunder,"All songs",audioArrayList),
-                Folder(R.drawable.ic_thunder,"Favorites",audioArrayList)))
+        val folderList = mutableListOf<Folder>(
+                Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
+                Folder(R.drawable.ic_star, "Favorites", audioArrayList))
 
 
-
+        addFolder(folderList)
         binding.viewPager.adapter=adapter
 
         binding.viewPager.clipToPadding = false
@@ -84,30 +96,104 @@ class MainActivity : AppCompatActivity() {
         val compositePageTransformer = CompositePageTransformer()
         compositePageTransformer.addTransformer(MarginPageTransformer(40))
         compositePageTransformer.addTransformer { page, position ->
-
             val r = 1 - abs(position)
             page.scaleY = 0.85f + r * 0.15f
         }
-
         binding.viewPager.setPageTransformer(compositePageTransformer)
 
+        binding.cardMenu.setOnClickListener {
+
+            val dialog = AlertDialog.Builder(this).create()
+            val dialogView = layoutInflater.inflate(R.layout.adding_folder_dialog, binding.root, false)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.setView(dialogView)
+
+            val ok = dialogView.findViewById<CardView>(R.id.yes)
+            val no = dialogView.findViewById<CardView>(R.id.no)
+            val et = dialogView.findViewById<EditText>(R.id.et_folder)
+
+            et.requestFocus()
+            et.isFocusableInTouchMode = true
+
+            dialog.show()
+
+            no.setOnClickListener {
+                dialog.dismiss()
+            }
+            ok.setOnClickListener {
+                val folderName = et.text
+                val newFolder = Folder(R.drawable.ic_thunder,folderName.toString(),audioArrayList)
+                folderList.add(folderList.size,newFolder)
+                addFolder(folderList)
+                dialog.dismiss()
+            }
+
+        }
+
     }
 
-    //checking permission
-    private fun checkPermissions() {
-        Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(object : PermissionListener {
-                    override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-                    }
-                    override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {}
-                    override fun onPermissionRationaleShouldBeShown(
-                            permissionRequest: PermissionRequest,
-                            permissionToken: PermissionToken
-                    ) {
-                        // asking for permission
-                        permissionToken.continuePermissionRequest()
-                    }
-                }).check()
+    private fun addFolder(list: MutableList<Folder>){
+        adapter.differ.submitList(list)
+        //adapter.notifyItemInserted(adapter.differ.currentList.size)
     }
 
+
+    private fun fetchAudioFiles():ArrayList<ModelAudio>{
+        //fetch the audio files from storage
+        val contentResolver = this.contentResolver
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
+        val returningFiles = ArrayList<ModelAudio>()
+
+        //looping through all rows and adding to list
+        when{
+            cursor == null -> {
+                // query failed, handle error.
+                Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            !cursor.moveToFirst() -> {
+                // no media on the device
+                Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            else ->{
+                do {
+                    val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    returningFiles.add(ModelAudio(id, title, "null", artist, url, false, false))
+                } while (cursor.moveToNext())
+                cursor.close()
+                return  returningFiles
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>,
+                                            grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                audioArrayList = fetchAudioFiles()
+
+                adapter = FolderViewPagerAdapter{ model: Folder ->
+                    val intent = Intent(this, FolderActivity::class.java)
+                    intent.putExtra("folder", model)
+                    startActivity(intent)
+                }
+                adapter.differ.submitList(mutableListOf(
+                        Folder(R.drawable.ic_thunder, "All songs", audioArrayList),
+                        Folder(R.drawable.ic_star, "Favorites", audioArrayList)))
+                binding.viewPager.adapter=adapter
+
+                Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }

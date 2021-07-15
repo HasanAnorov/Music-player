@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">NewDesignMusicPLayer</string>
     <string name="search">Search ...</string>
+    <string name="months">Months</string>
+    <string name="calvin_harris">Calvin Harris</string>
+    <string name="clothes">Clothes</string>
+    <string name="ambient">Ambient</string>
+    <string name="now_playing">Now playing</string>
+    <string name="hello_dear">Hello, Dear</string>
+    <string name="top_tracks">Top Tracks :</string>
+    <string name="remove">Remove</string>
 </resources>

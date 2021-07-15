@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="16dp"
+    android:padding="10dp"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:backgroundTint="@color/white"
+        android:layout_marginEnd="8dp"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:padding="6dp"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardCornerRadius="20dp"
+        >
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_menu"
+            android:backgroundTint="#DB000000"
+            android:focusable="false" />
+
+    </androidx.cardview.widget.CardView>
+
+
 
     <TextView
         android:id="@+id/musicName"
@@ -19,7 +49,7 @@
         android:layout_marginStart="16dp"
         android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintEnd_toStartOf="@id/musicTime"
+        app:layout_constraintEnd_toStartOf="@id/card_menu"
         android:layout_marginEnd="16dp"/>
 
     <TextView
@@ -34,41 +64,32 @@
         android:maxLines="1"
         android:textSize="14sp"
         android:ellipsize="end"
-        app:layout_constraintEnd_toStartOf="@id/musicTime"
+        app:layout_constraintEnd_toStartOf="@id/card_menu"
         android:layout_marginEnd="16dp"/>
 
-    <TextView
-        android:id="@+id/musicTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="02:32"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/musicName"
-        app:layout_constraintBottom_toBottomOf="@id/musicName"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="10dp"/>
+
 
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardMusicPhoto"
         android:layout_width="54dp"
         android:layout_height="54dp"
+        android:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="32dp"
-        app:cardCornerRadius="27dp">
+        android:layout_marginStart="6dp"
+        app:cardCornerRadius="12dp">
 
         <ImageView
             android:id="@+id/onGoingMusicImage"
             android:layout_width="match_parent"
-            android:background="#131A42"
+            android:src="@drawable/music_photo"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
             android:layout_gravity="center"/>
+
 
     </androidx.cardview.widget.CardView>
 
