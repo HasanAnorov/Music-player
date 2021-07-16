@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer.Services
+package com.example.newdesignmusicplayer.services
 
 import android.content.BroadcastReceiver
 import android.content.Context

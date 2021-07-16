@@ -3,7 +3,6 @@ package com.example.newdesignmusicplayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -14,7 +13,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -22,25 +20,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doOnTextChanged
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.CompositePageTransformer
-import androidx.viewpager2.widget.MarginPageTransformer
 import com.example.newdesignmusicplayer.adapter.FolderViewPagerAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.model.ModelAudio
 import com.example.newdesignmusicplayer.utils.Constants
 import com.github.zawadz88.materialpopupmenu.popupMenu
-import java.text.FieldPosition
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(),OnFolderListener {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: FolderViewPagerAdapter
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
@@ -67,19 +60,24 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
             // Requesting the permission
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), Constants.STORAGE_PERMISSION_CODE)
         } else {
-            Constants.setFolders(Folder("You musics",Constants.fetchAudioFiles(this)))
-            Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
+//            GlobalScope.launch {
+//                Constants.setFolders(Folder("Your musics",fetchAudioFiles()))
+//                Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
+//            }
+
+                setAdapter()
+
         }
 
-        //opening clicked playlist
-        adapter = FolderViewPagerAdapter(this){ model: Folder ->
-            val intent = Intent(this, FolderActivity::class.java)
-            intent.putExtra("folder", model)
-            startActivity(intent)
-        }
-
-        adapter.differ.submitList(Constants.getFolders())
-        binding.recyclerView.adapter=adapter
+//        //opening clicked playlist
+//        adapter = FolderViewPagerAdapter(this){ model: Folder ->
+//            val intent = Intent(this, FolderActivity::class.java)
+//            intent.putExtra("folder", model)
+//            startActivity(intent)
+//        }
+//
+//        adapter.differ.submitList(Constants.getFolders())
+//        binding.recyclerView.adapter=adapter
 
         binding.cardMenu.setOnClickListener {
 
@@ -116,28 +114,65 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
 
     }
 
+     private fun fetchAudioFiles():ArrayList<ModelAudio>{
+
+        val contentResolver = this.contentResolver
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val cursor: Cursor? = contentResolver?.query(uri, null, null, null, null)
+        val returningFiles = ArrayList<ModelAudio>()
+
+        //looping through all rows and adding to list
+        when{
+            cursor == null -> {
+                // query failed, handle error.
+                Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            !cursor.moveToFirst() -> {
+                // no media on the device
+                Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+                return returningFiles
+            }
+            else ->{
+                do {
+                    val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+                    val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    returningFiles.add(ModelAudio(id, title, "null", artist, url, false, false))
+                } while (cursor.moveToNext())
+                cursor.close()
+                return  returningFiles
+            }
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                adapter = FolderViewPagerAdapter(this){ model: Folder ->
-                    val intent = Intent(this, FolderActivity::class.java)
-                    intent.putExtra("folder", model)
-                    startActivity(intent)
-                }
-                Constants.setFolders(Folder("Your musics",Constants.fetchAudioFiles(this)))
-                Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
-                adapter.differ.submitList(Constants.getFolders())
-                binding.recyclerView.adapter=adapter
-
+                    setAdapter()
                 Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private  fun setAdapter(){
+        adapter = FolderViewPagerAdapter(this){ model: Folder ->
+            val intent = Intent(this, FolderActivity::class.java)
+            intent.putExtra("folder", model)
+            startActivity(intent)
+        }
+
+            Constants.setFolders(Folder("Your musics",fetchAudioFiles()))
+            Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
+
+        adapter.differ.submitList(Constants.getFolders())
+        binding.recyclerView.adapter=adapter
     }
 
     override fun onFolderItemClick(view:View,folder:Folder,position: Int) {

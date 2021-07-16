@@ -5,14 +5,11 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.withStarted
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.model.Folder
@@ -26,7 +23,6 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
-    private lateinit var musicList :ArrayList<ModelAudio>
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,13 +40,9 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.statusBarColor = getColor(R.color.folderActivity)
             window.navigationBarColor = getColor(R.color.white)
-
         }
 
         val folder = intent.getSerializableExtra("folder") as Folder
-        musicList = ArrayList()
-        musicList = folder.musicList
-        binding.textView.text = "${musicList.size} tracks"
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -66,22 +58,24 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             }
         })
 
-            adapter =MusicListAdapter(this,this){  position: Int ->
-
-            val intent = Intent(this, MusicActivity::class.java)
-            intent.putExtra("musics", musicList)
-            intent.putExtra("pos", position)
-            startActivity(intent)
-        }
-
-        binding.recyclerView.setHasFixedSize(true)
-
-        adapter.differ.submitList(musicList)
-        binding.recyclerView.adapter = adapter
+            setAdapter(folder.musicList)
+            binding.textView.text = "${folder.musicList.size} tracks"
+            binding.btnArrow.elevation = 0F
 
         binding.btnArrow.setOnClickListener {
             onBackPressed()
         }
+    }
+
+     private  fun setAdapter(musics:ArrayList<ModelAudio>){
+             adapter =MusicListAdapter(this@FolderActivity,this@FolderActivity){  position: Int ->
+                 val intent = Intent(this@FolderActivity, MusicActivity::class.java)
+                 intent.putExtra("musics", musics)
+                 intent.putExtra("pos", position)
+                 startActivity(intent)
+             }
+             adapter.differ.submitList(musics)
+             binding.recyclerView.adapter = adapter
     }
 
     fun onQueryTextChange(newText: String){
@@ -93,8 +87,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
                 myFiles.add(song)
             }
         }
-         musicList = myFiles
-         adapter.differ.submitList(myFiles)
+        setAdapter(myFiles)
     }
 
     override fun onMenuItemClick(model: ModelAudio, position: Int,view:View) {

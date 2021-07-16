@@ -1,6 +1,5 @@
 package com.example.newdesignmusicplayer
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -16,24 +15,16 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
-import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
-import com.example.newdesignmusicplayer.Services.OnClearFromRecentService
+import com.example.newdesignmusicplayer.services.OnClearFromRecentService
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.model.ModelAudio
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import java.io.Serializable
-import java.text.FieldPosition
 
 open class MusicActivity : AppCompatActivity(),Serializable {
 
@@ -44,7 +35,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
-
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +57,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         val position = intent.getIntExtra("pos", 0)
         audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
 
-        checkPermissions()
+        //checkPermissions()
         setAudio(position,audioArrayList)
 
         val broadcastReceiver = object :BroadcastReceiver(){
@@ -75,16 +65,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                 val action = intent?.getStringExtra("actionname")
                 when(action){
                     CreateNotification().ACTION_NEXT -> {
-                        //Toast.makeText(context, "Notification Next", Toast.LENGTH_SHORT).show()
                         nextAudio(audioArrayList)
                     }
                     CreateNotification().ACTION_PLAY ->{
-                        //Toast.makeText(context, "Notification Play", Toast.LENGTH_SHORT).show()
                         setPause(audioArrayList)
                     }
                     CreateNotification().ACTION_PREVIOUS ->{
                         prevAudio(audioArrayList)
-                        //Toast.makeText(context, "Notification Previous", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -123,7 +110,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //getting audio image
-    fun getAlbumArt(uri: String): ByteArray? {
+    private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(uri)
         val art = retriever.embeddedPicture
@@ -140,6 +127,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         var isFavorite = true
 
         audio_index = pos
+
 
         mediaPlayer = MediaPlayer()
         mediaPlayer.reset()
@@ -246,7 +234,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
         }
 
-
         playAudio(pos,audioArrayList)
 
         //seekbar change listener
@@ -338,11 +325,9 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         if (audio_index > 0) {
             audio_index--
             playAudio(audio_index,audioArrayList)
-           // CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
         } else {
             audio_index = audioArrayList.size - 1
             playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
         }
     }
 
@@ -351,11 +336,9 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         if (audio_index < audioArrayList.size - 1) {
             audio_index++
             playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
         } else {
             audio_index = 0
             playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
         }
     }
 
@@ -365,7 +348,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             mediaPlayer.pause()
             binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
             CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
-            //Toast.makeText(this, audioArrayList[audio_index].audioDuration, Toast.LENGTH_SHORT).show()
         } else {
             mediaPlayer.start()
             binding.playPause.setImageResource(R.drawable.ic_pause)
@@ -388,31 +370,8 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         return audioTime
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-    }
-
-    //release mediaplayer
     override fun onDestroy() {
         super.onDestroy()
+        mediaPlayer.release()
     }
-
-    //checking permission
-    private fun checkPermissions() {
-        Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(object : PermissionListener {
-                    override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-                    }
-
-                    override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {}
-                    override fun onPermissionRationaleShouldBeShown(
-                            permissionRequest: PermissionRequest,
-                            permissionToken: PermissionToken
-                    ) {
-                        // asking for permission
-                        permissionToken.continuePermissionRequest()
-                    }
-                }).check()
-    }
-
 }
