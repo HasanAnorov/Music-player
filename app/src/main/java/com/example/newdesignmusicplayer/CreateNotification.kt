@@ -10,7 +10,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.newdesignmusicplayer.Services.NotificationActionService
+import com.example.newdesignmusicplayer.services.NotificationActionService
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 
 

@@ -21,9 +21,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
-import com.example.newdesignmusicplayer.Services.OnClearFromRecentService
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.services.OnClearFromRecentService
 import java.io.Serializable
 
 open class MusicActivity : AppCompatActivity(),Serializable {

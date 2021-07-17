@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-parcelize'
     id 'kotlin-kapt'
 }
 
@@ -39,22 +38,6 @@ android {
 
 dependencies {
 
-    //ROOM DATABASE
-    def room_version = "2.2.6"
-    implementation "androidx.room:room-runtime:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
-
-    //Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
-
-    //Coroutine Lifecycle Scopes
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
-
-    //Dexter
-    implementation 'com.karumi:dexter:6.2.2'
-
     //GSON
     implementation 'com.google.code.gson:gson:2.8.6'
 
@@ -71,6 +54,12 @@ dependencies {
     //material popup  menu
     implementation 'com.github.zawadz88.materialpopupmenu:material-popup-menu:4.1.0'
 
+    //room
+    def room_version = "2.3.0"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt "androidx.room:room-compiler:$room_version"
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'com.google.android.exoplayer:extension-mediasession:2.14.1'
@@ -80,4 +69,15 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+//    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.32"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.10"
+//    implementation 'androidx.core:core-ktx:1.6.0'
+//    implementation 'com.google.android.exoplayer:extension-mediasession:2.14.1'
+//    implementation 'androidx.appcompat:appcompat:1.3.0'
+//    implementation 'com.google.android.material:material:1.4.0'
+//    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+//    testImplementation 'junit:junit:4.13.2'
+//    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

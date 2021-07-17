@@ -1,5 +1,6 @@
 package com.example.newdesignmusicplayer
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -12,8 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
-import com.example.newdesignmusicplayer.model.Folder
 import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomFolderModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
@@ -25,6 +26,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
     private lateinit var adapter: MusicListAdapter
     private lateinit var musicList :List<RoomAudioModel>
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,9 +46,9 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
         }
 
-        val folder = intent.getSerializableExtra("folder") as Folder
+        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
         musicList = ArrayList()
-        musicList = folder.musicList
+        musicList = folder.audioList!!
         binding.textView.text = "${musicList.size} tracks"
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
@@ -82,14 +84,14 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
     }
 
     fun onQueryTextChange(newText: String){
-        val folder = intent.getSerializableExtra("folder") as Folder
-        val userInput = newText.toLowerCase(Locale.ROOT)
+        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
+        //val userInput = newText.toLowerCase(Locale.ROOT)
         //val myFiles = List<RoomAudioModel>()
         val myFiles = listOf<RoomAudioModel>()
-        for (song in folder.musicList) {
-            if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
-                //myFiles.add(song)
-            }
+        for (song in folder.audioList!!) {
+//            if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
+//                myFiles.add(song)
+//            }
         }
          musicList = myFiles
          adapter.differ.submitList(myFiles)

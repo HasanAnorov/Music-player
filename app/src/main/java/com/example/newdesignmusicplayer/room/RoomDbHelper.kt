@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
-@Database(entities = [RoomAudioModel::class], version = 1)
+@Database(entities = [RoomAudioModel::class,RoomFolderModel::class], version = 1,exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class RoomDbHelper : RoomDatabase() {
 
     abstract fun roomDao():RoomDao
@@ -28,6 +30,5 @@ abstract class RoomDbHelper : RoomDatabase() {
             "media_player.db")
             .allowMainThreadQueries()
             .build()
-
     }
 }
