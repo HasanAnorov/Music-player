@@ -5,17 +5,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.media.session.PlaybackState
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.newdesignmusicplayer.Services.NotificationActionService
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
 
 
 class CreateNotification {
@@ -27,7 +23,7 @@ class CreateNotification {
 
     lateinit var notification: Notification
 
-    fun createNotification(context: Context,track:ModelAudio,playButton:Int){
+    fun createNotification(context: Context,track:RoomAudioModel,playButton:Int){
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             val notificationManagerCompat = NotificationManagerCompat.from(context)
             val mediaSessionCompat = MediaSessionCompat(context, "Player service")

@@ -5,18 +5,15 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.withStarted
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.model.Folder
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
@@ -26,7 +23,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
-    private lateinit var musicList :ArrayList<ModelAudio>
+    private lateinit var musicList :List<RoomAudioModel>
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +66,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             adapter =MusicListAdapter(this,this){  position: Int ->
 
             val intent = Intent(this, MusicActivity::class.java)
-            intent.putExtra("musics", musicList)
+            intent.putExtra("musics", musicList as Serializable)
             intent.putExtra("pos", position)
             startActivity(intent)
         }
@@ -87,17 +84,18 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
     fun onQueryTextChange(newText: String){
         val folder = intent.getSerializableExtra("folder") as Folder
         val userInput = newText.toLowerCase(Locale.ROOT)
-        val myFiles = ArrayList<ModelAudio>()
+        //val myFiles = List<RoomAudioModel>()
+        val myFiles = listOf<RoomAudioModel>()
         for (song in folder.musicList) {
             if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
-                myFiles.add(song)
+                //myFiles.add(song)
             }
         }
          musicList = myFiles
          adapter.differ.submitList(myFiles)
     }
 
-    override fun onMenuItemClick(model: ModelAudio, position: Int,view:View) {
+    override fun onMenuItemClick(model: RoomAudioModel, position: Int,view:View) {
         val popupMenu = popupMenu {
             style = R.style.Widget_MPM_Menu_Dark_CustomBackground
             section {

@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -22,20 +21,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doOnTextChanged
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.CompositePageTransformer
-import androidx.viewpager2.widget.MarginPageTransformer
 import com.example.newdesignmusicplayer.adapter.FolderViewPagerAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.model.Folder
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.utils.Constants
 import com.github.zawadz88.materialpopupmenu.popupMenu
-import java.text.FieldPosition
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(),OnFolderListener {
 
@@ -47,6 +40,8 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        val dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
 
         setContentView(binding.root)
         supportActionBar?.hide()
@@ -67,8 +62,8 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
             // Requesting the permission
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), Constants.STORAGE_PERMISSION_CODE)
         } else {
-            Constants.setFolders(Folder("You musics",Constants.fetchAudioFiles(this)))
-            Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
+            Constants.setFolders(Folder("You musics",dbHelper.roomDao().getMusics()))
+            Constants.setFolders(Folder("Favorites", listOf<RoomAudioModel>()))
         }
 
         //opening clicked playlist
@@ -123,13 +118,48 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
         if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+                val dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
+
+                    val contentResolver = this.contentResolver
+                    val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+
+                    //looping through all rows and adding to list
+                    when{
+                        cursor == null -> {
+                            // query failed, handle error.
+                            Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+
+                        }
+                        !cursor.moveToFirst() -> {
+                            // no media on the device
+                            Toast.makeText(this, "No music found on this phone", Toast.LENGTH_SHORT).show()
+
+                        }
+                        else ->{
+                            do {
+                                val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
+                                val title: String = cursor.getString(cursor.getColumnIndex(
+                                    MediaStore.Audio.Media.TITLE))
+                                val artist: String = cursor.getString(cursor.getColumnIndex(
+                                    MediaStore.Audio.Media.ARTIST))
+                                val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = false)
+                                dbHelper.roomDao().insertMusic(roomAudio)
+
+                            } while (cursor.moveToNext())
+                            cursor.close()
+                        }
+                    }
+
+
                 adapter = FolderViewPagerAdapter(this){ model: Folder ->
                     val intent = Intent(this, FolderActivity::class.java)
                     intent.putExtra("folder", model)
                     startActivity(intent)
                 }
-                Constants.setFolders(Folder("Your musics",Constants.fetchAudioFiles(this)))
-                Constants.setFolders(Folder("Favorites", arrayListOf<ModelAudio>()))
+                Constants.setFolders(Folder("Your musics",dbHelper.roomDao().getMusics()))
+                Constants.setFolders(Folder("Favorites", arrayListOf<RoomAudioModel>()))
                 adapter.differ.submitList(Constants.getFolders())
                 binding.recyclerView.adapter=adapter
 
