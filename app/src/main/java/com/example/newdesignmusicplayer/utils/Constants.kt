@@ -1,7 +1,7 @@
 package com.example.newdesignmusicplayer.utils
 
 import com.example.newdesignmusicplayer.model.Folder
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
 
 object Constants {
 
@@ -15,15 +15,15 @@ object Constants {
         return allFolders
     }
 
-    fun setFavorite(item:ModelAudio){
+    fun setFavorite(item: RoomAudioModel){
 
     }
 
-    fun getFavorites():ArrayList<ModelAudio>{
+    fun getFavorites():ArrayList<RoomAudioModel>{
         return arrayListOf()
     }
 
-    fun checkForFavorite(item:ModelAudio):Boolean{
+    fun checkForFavorite(item:RoomAudioModel):Boolean{
         return true
     }
 

@@ -11,6 +11,5 @@ data class RoomAudioModel (
     var audioDuration: String? = null,
     var audioArtist: String? = null,
     var audioUri: String? = null,
-    var isPlaying:Boolean = false,
     var isFavorite:Boolean = false
 )

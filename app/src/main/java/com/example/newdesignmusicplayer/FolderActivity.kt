@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
-import com.example.newdesignmusicplayer.model.Folder
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomFolderModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
@@ -42,7 +42,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             window.navigationBarColor = getColor(R.color.white)
         }
 
-        val folder = intent.getSerializableExtra("folder") as Folder
+        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -58,8 +58,10 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             }
         })
 
-            setAdapter(folder.musicList)
-            binding.textView.text = "${folder.musicList.size} tracks"
+            //setAdapter(folder.musicList)
+            setAdapter(Collections.emptyList())
+            //binding.textView.text = "${folder.musicList.size} tracks"
+            binding.textView.text = "Error tracks"
             binding.btnArrow.elevation = 0F
 
         binding.btnArrow.setOnClickListener {
@@ -67,22 +69,23 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         }
     }
 
-     private  fun setAdapter(musics:ArrayList<ModelAudio>){
-             adapter =MusicListAdapter(this@FolderActivity,this@FolderActivity){  position: Int ->
+     private  fun setAdapter(music:List<RoomAudioModel>){
+             adapter = MusicListAdapter(this@FolderActivity,this@FolderActivity){  position: Int ->
                  val intent = Intent(this@FolderActivity, MusicActivity::class.java)
-                 intent.putExtra("musics", musics)
+                 intent.putExtra("musics", music as Serializable )
                  intent.putExtra("pos", position)
                  startActivity(intent)
              }
-             adapter.differ.submitList(musics)
+             adapter.differ.submitList(music)
              binding.recyclerView.adapter = adapter
     }
 
     fun onQueryTextChange(newText: String){
-        val folder = intent.getSerializableExtra("folder") as Folder
+        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
         val userInput = newText.toLowerCase(Locale.ROOT)
-        val myFiles = ArrayList<ModelAudio>()
-        for (song in folder.musicList) {
+        val myFiles = ArrayList<RoomAudioModel>()
+        //for (song in folder.musicList) {
+        for (song in listOf<RoomAudioModel>()) {
             if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
                 myFiles.add(song)
             }
@@ -90,7 +93,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         setAdapter(myFiles)
     }
 
-    override fun onMenuItemClick(model: ModelAudio, position: Int,view:View) {
+    override fun onMenuItemClick(roomModel: RoomAudioModel, position: Int, view:View) {
         val popupMenu = popupMenu {
             style = R.style.Widget_MPM_Menu_Dark_CustomBackground
             section {

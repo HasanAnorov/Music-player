@@ -8,17 +8,18 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newdesignmusicplayer.OnFolderListener
 import com.example.newdesignmusicplayer.databinding.FolderItemViewBinding
-import com.example.newdesignmusicplayer.model.Folder
+import com.example.newdesignmusicplayer.room.RoomFolderModel
+import java.io.Serializable
 
 
-class FolderViewPagerAdapter(val listener:OnFolderListener,val itemClick:(folder: Folder) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>() {
+class FolderViewPagerAdapter(val listener:OnFolderListener,val itemClick:(folder: RoomFolderModel) ->Unit): RecyclerView.Adapter<FolderViewPagerAdapter.ViewHolderHomeFragment>(),Serializable {
 
-    private val itemCallback = object : DiffUtil.ItemCallback<Folder>(){
-        override fun areItemsTheSame(oldItem: Folder, newItem: Folder): Boolean {
+    private val itemCallback = object : DiffUtil.ItemCallback<RoomFolderModel>(){
+        override fun areItemsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
             return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: Folder, newItem: Folder): Boolean {
+        override fun areContentsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
             return  oldItem.folderName == newItem.folderName
         }
 
@@ -28,7 +29,7 @@ class FolderViewPagerAdapter(val listener:OnFolderListener,val itemClick:(folder
     val differ = AsyncListDiffer(this,itemCallback)
 
     inner class ViewHolderHomeFragment(private  var binding:FolderItemViewBinding): RecyclerView.ViewHolder(binding.root){
-        fun onBind(model: Folder){
+        fun onBind(model: RoomFolderModel){
             binding.folderName.text = model.folderName
             binding.folderSongs.text = "${model.musicList.size} tracks"
             binding.cardMenu.elevation = 0F

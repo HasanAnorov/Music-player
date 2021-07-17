@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-parcelize'
     id 'kotlin-kapt'
 }
 
@@ -58,9 +57,13 @@ dependencies {
     //material popup  menu
     implementation 'com.github.zawadz88.materialpopupmenu:material-popup-menu:4.1.0'
 
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     //room
-    def room_version = "2.2.6"
-    implementation "androidx.room:room-runtime:$room_version"
+    def room_version = "2.3.0"
+
+    implementation("androidx.room:room-runtime:$room_version")
     kapt "androidx.room:room-compiler:$room_version"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
