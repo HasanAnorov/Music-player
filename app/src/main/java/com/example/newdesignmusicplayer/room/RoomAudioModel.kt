@@ -5,11 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class RoomAudioModel (
-    var audioTitle: String? = null,
-    var audioDuration: String? = null,
-    var audioArtist: String? = null,
-    var audioUri: String? = null,
-    var isFavorite:Boolean = false
+    var audioTitle: String,
+    var audioDuration: String,
+    var audioArtist: String,
+    var audioUri: String,
+    var isFavorite:Boolean
 ){
     @PrimaryKey(autoGenerate = true)
     var id :Int = 0

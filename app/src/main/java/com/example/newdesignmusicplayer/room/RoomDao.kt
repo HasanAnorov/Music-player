@@ -17,8 +17,11 @@ interface RoomDao {
     @Query("select * from folder")
     fun getFolders():List<RoomFolderModel>?
 
-//    @Delete()
-//    fun deleteFolder(roomFolderModel: RoomFolderModel)
+    @Query("SELECT * FROM folder WHERE folderName LIKE :name ")
+    fun getFolder(name :String):RoomFolderModel
+
+    @Delete()
+    fun deleteFolder(roomFolderModel: RoomFolderModel)
 
     @Delete()
     fun deleteMusic(roomAudioModel: RoomAudioModel)

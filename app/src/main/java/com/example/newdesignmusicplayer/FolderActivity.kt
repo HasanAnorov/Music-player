@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -14,17 +15,17 @@ import androidx.core.content.ContextCompat
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
-import com.example.newdesignmusicplayer.room.RoomFolderModel
+import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
-import kotlin.collections.ArrayList
 
 class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
     private lateinit var musicList :List<RoomAudioModel>
+    private lateinit var dbHelper: RoomDbHelper
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
@@ -33,6 +34,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         binding = ActivityFolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+        dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -46,26 +48,34 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
         }
 
-        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
-        musicList = ArrayList()
-        musicList = folder.audioList!!
+        val folderName = intent.getStringExtra("folderName") as String
+        val folder = dbHelper.roomDao().getFolder(folderName)
+        musicList = folder.audioList
+
+
         binding.textView.text = "${musicList.size} tracks"
+        binding.tvFolderName.text = folderName
+        binding.btnArrow.elevation = 0F
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
             }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 onQueryTextChange(s.toString())
             }
-
             override fun afterTextChanged(s: Editable?) {
-
             }
         })
 
-            adapter =MusicListAdapter(this,this){  position: Int ->
+           setAdapter(musicList)
+
+        binding.btnArrow.setOnClickListener {
+            onBackPressed()
+        }
+    }
+
+    private fun setAdapter(musicList:List<RoomAudioModel>){
+        adapter =MusicListAdapter(this,this){  position: Int ->
 
             val intent = Intent(this, MusicActivity::class.java)
             intent.putExtra("musics", musicList as Serializable)
@@ -73,27 +83,19 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             startActivity(intent)
         }
 
-        binding.recyclerView.setHasFixedSize(true)
-
         adapter.differ.submitList(musicList)
         binding.recyclerView.adapter = adapter
-
-        binding.btnArrow.setOnClickListener {
-            onBackPressed()
-        }
     }
 
     fun onQueryTextChange(newText: String){
-        val folder = intent.getSerializableExtra("folder") as RoomFolderModel
-        //val userInput = newText.toLowerCase(Locale.ROOT)
-        //val myFiles = List<RoomAudioModel>()
-        val myFiles = listOf<RoomAudioModel>()
-        for (song in folder.audioList!!) {
-//            if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
-//                myFiles.add(song)
-//            }
+        val userInput = newText.toLowerCase(Locale.ROOT)
+        val myFiles = arrayListOf<RoomAudioModel>()
+        for (song in musicList) {
+            if (song.audioTitle.toLowerCase(Locale.ROOT).contains(userInput)){
+                myFiles.add(song)
+            }
         }
-         musicList = myFiles
+         //musicList = myFiles
          adapter.differ.submitList(myFiles)
     }
 
@@ -125,5 +127,4 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         }
         popupMenu.show(this, view)
     }
-
 }

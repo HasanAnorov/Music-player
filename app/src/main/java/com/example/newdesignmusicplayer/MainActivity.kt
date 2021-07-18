@@ -20,33 +20,33 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.newdesignmusicplayer.adapter.FolderViewPagerAdapter
+import com.example.newdesignmusicplayer.adapter.FolderAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.room.RoomFolderModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.io.Serializable
 import java.util.*
 
-class MainActivity : AppCompatActivity(),OnFolderListener {
+class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var adapter: FolderViewPagerAdapter
+    private lateinit var adapter: FolderAdapter
     val STORAGE_PERMISSION_CODE = 1
+    private lateinit var dbHelper: RoomDbHelper
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-        val dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
-
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        adapter = FolderAdapter(this)
+        dbHelper.roomDao().getFolders()?.let { setAdapter(it) }
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -63,9 +63,10 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
-        } else {
-            dbHelper.roomDao().getFolders()?.let { setAdapter(it) }
         }
+
+
+
 
 
         binding.cardMenu.setOnClickListener {
@@ -97,6 +98,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
                     //do mentioned
                     val newRoomFolder = RoomFolderModel(folderName = folderName,audioList = listOf<RoomAudioModel>())
                     dbHelper.roomDao().insertFolder(newRoomFolder)
+                    //adapter.notifyItemInserted()
                     dialog.dismiss()
                 }
             }
@@ -106,16 +108,9 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
     }
 
     private  fun setAdapter(folders:List<RoomFolderModel>){
-        adapter = FolderViewPagerAdapter(this) { model: RoomFolderModel ->
-            val intent = Intent(this, FolderActivity::class.java)
-            intent.putExtra("folder", model as Serializable )
-            startActivity(intent)
-        }
-
         adapter.differ.submitList(folders)
         binding.recyclerView.adapter=adapter
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
@@ -123,8 +118,6 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                val dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
 
                     val contentResolver = this.contentResolver
                     val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -134,7 +127,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
                     when{
                         cursor == null -> {
                             // query failed, handle error.
-                            Toast.makeText(this, "Cannot read music", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Cannot read music !", Toast.LENGTH_SHORT).show()
 
                         }
                         !cursor.moveToFirst() -> {
@@ -144,7 +137,6 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
                         }
                         else ->{
                             do {
-                                val id: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
                                 val title: String = cursor.getString(cursor.getColumnIndex(
                                     MediaStore.Audio.Media.TITLE))
                                 val artist: String = cursor.getString(cursor.getColumnIndex(
@@ -162,12 +154,12 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
 
                 dbHelper.roomDao().insertFolder(roomFolderModel)
 
+
                 val folders = dbHelper.roomDao().getFolders()
 
                 if (folders != null) {
                     setAdapter(folders)
                 }
-
                 Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this@MainActivity, "Storage Permission Denied", Toast.LENGTH_SHORT).show()
@@ -222,11 +214,19 @@ class MainActivity : AppCompatActivity(),OnFolderListener {
                     iconColor =ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
                     callback = {
                         //Do something to remove folder!
-                        Toast.makeText(this@MainActivity, "Do something to remove folder!", Toast.LENGTH_SHORT).show()
+                        dbHelper.roomDao().deleteFolder(folder)
+                        //adapter.notifyItemRemoved(position)
+                        //Toast.makeText(this@MainActivity, position, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
         popupMenu.show(this, view)
+    }
+
+    override fun onFolderClick(folder: RoomFolderModel) {
+            val intent = Intent(this, FolderActivity::class.java)
+            intent.putExtra("folderName",folder.folderName)
+            startActivity(intent)
     }
 }
