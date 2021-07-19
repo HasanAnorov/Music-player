@@ -9,7 +9,7 @@ data class RoomAudioModel (
     var audioDuration: String,
     var audioArtist: String,
     var audioUri: String,
-    var isFavorite:Boolean
+    var isFavorite:Int
 ){
     @PrimaryKey(autoGenerate = true)
     var id :Int = 0

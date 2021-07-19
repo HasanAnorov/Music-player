@@ -146,6 +146,25 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             )
         }
 
+        var cardDrawableBookmark: Drawable = binding.cardBookmark.background
+        cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
+        val state = dbHelper.roomDao().getMusic(pos+1).isFavorite
+        var stateBoolean = false
+
+        if(state==1){
+            stateBoolean = true
+            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+            binding.cardBookmark.background = cardDrawableBookmark
+
+            binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
+        }else{
+            stateBoolean = false
+            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
+            binding.cardBookmark.background = cardDrawableBookmark
+
+            binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+        }
+
         binding.cardShuffle.setOnClickListener {
 
             isRandomPlayingActivated =!isRandomPlayingActivated
@@ -180,25 +199,21 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         binding.cardBookmark.setOnClickListener {
 
-            var cardDrawable: Drawable = binding.cardBookmark.background
-            cardDrawable = DrawableCompat.wrap(cardDrawable)
+            stateBoolean = !stateBoolean
+            if (stateBoolean){
+                dbHelper.roomDao().setFavorite(1,pos+1)
 
-            var ivDrawable = binding.bookmarkIv.background
-            ivDrawable = DrawableCompat.wrap(ivDrawable)
-
-            val state = dbHelper.roomDao().getMusic(pos+1).isFavorite
-            //dbHelper.roomDao().setFavorite(pos+1,!state)
-
-            if(state){
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-                binding.cardBookmark.background = cardDrawable
-
+                DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+                binding.cardBookmark.background = cardDrawableBookmark
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
-            }else{
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-                binding.cardBookmark.background = cardDrawable
 
+            }else{
+                dbHelper.roomDao().setFavorite(0,pos+1)
+
+                DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
+                binding.cardBookmark.background = cardDrawableBookmark
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+
             }
 
         }

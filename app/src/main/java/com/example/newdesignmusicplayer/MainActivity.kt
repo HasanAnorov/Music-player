@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                                 val artist: String = cursor.getString(cursor.getColumnIndex(
                                     MediaStore.Audio.Media.ARTIST))
                                 val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = false)
+                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = 0)
                                 dbHelper.roomDao().insertMusic(roomAudio)
 
                             } while (cursor.moveToNext())

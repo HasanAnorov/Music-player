@@ -16,6 +16,9 @@ interface RoomDao {
     @Query("UPDATE RoomFolderModel SET folderName = :newFolderName WHERE folderName = :oldFolderName")
     fun setNewFolderName(newFolderName: String, oldFolderName: String)
 
+    @Query("UPDATE ROOMAUDIOMODEL SET isFavorite= :intState WHERE id = :position")
+    fun setFavorite(intState:Int,position: Int)
+
     @Query("SELECT EXISTS ( SELECT * FROM roomfoldermodel WHERE folderName = :newFolderName)")
     fun checkForExists(newFolderName: String):Boolean
 
