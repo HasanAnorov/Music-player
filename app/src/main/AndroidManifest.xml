@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.newdesignmusicplayer">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
 
     <application
         android:allowBackup="true"
@@ -24,8 +23,7 @@
         <activity android:name=".FolderActivity" android:windowSoftInputMode="adjustNothing" >
 
         </activity>
-        <activity android:name=".MainActivity"
-            >
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,10 +31,8 @@
             </intent-filter>
         </activity>
 
-
-        <receiver android:name=".Services.NotificationActionService"/>
-        <service android:name=".Services.OnClearFromRecentService"/>
-
+        <receiver android:name=".services.NotificationActionService"/>
+        <service android:name=".services.OnClearFromRecentService"/>
 
     </application>
 

@@ -1,6 +1,5 @@
 package com.example.newdesignmusicplayer
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -16,34 +15,28 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.PowerManager
-import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
-import com.example.newdesignmusicplayer.Services.OnClearFromRecentService
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
-import com.example.newdesignmusicplayer.model.ModelAudio
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
+import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomDbHelper
+import com.example.newdesignmusicplayer.services.OnClearFromRecentService
 import java.io.Serializable
-import java.text.FieldPosition
 
 open class MusicActivity : AppCompatActivity(),Serializable {
 
     private lateinit var binding:ActivityMusicNewBinding
     private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var audioArrayList: ArrayList<ModelAudio>
+    private lateinit var audioArrayList: List<RoomAudioModel>
     var current_pos = 0.0
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
+    private lateinit var dbHelper: RoomDbHelper
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -64,10 +57,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             window.navigationBarColor = getColor(R.color.musicActivity)
         }
 
-        val position = intent.getIntExtra("pos", 0)
-        audioArrayList = intent.getSerializableExtra("musics") as ArrayList<ModelAudio>
+        dbHelper  = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        val position = intent.getIntExtra("position", 0)
+        val folderName = intent.getStringExtra("folderName") as String
+        val folder = dbHelper.roomDao().getFolder(folderName)
+        audioArrayList = folder.audioList
 
-        checkPermissions()
+        //checkPermissions()
         setAudio(position,audioArrayList)
 
         val broadcastReceiver = object :BroadcastReceiver(){
@@ -75,16 +71,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                 val action = intent?.getStringExtra("actionname")
                 when(action){
                     CreateNotification().ACTION_NEXT -> {
-                        //Toast.makeText(context, "Notification Next", Toast.LENGTH_SHORT).show()
                         nextAudio(audioArrayList)
                     }
                     CreateNotification().ACTION_PLAY ->{
-                        //Toast.makeText(context, "Notification Play", Toast.LENGTH_SHORT).show()
                         setPause(audioArrayList)
                     }
                     CreateNotification().ACTION_PREVIOUS ->{
                         prevAudio(audioArrayList)
-                        //Toast.makeText(context, "Notification Previous", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -133,11 +126,10 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
     //setting audio files
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun setAudio(pos: Int,audioArrayList:ArrayList<ModelAudio>) {
+    private fun setAudio(pos: Int,audioArrayList:List<RoomAudioModel>) {
 
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
-        var isFavorite = true
 
         audio_index = pos
 
@@ -152,6 +144,25 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                             .setUsage(AudioAttributes.USAGE_MEDIA)
                             .build()
             )
+        }
+
+        var cardDrawableBookmark: Drawable = binding.cardBookmark.background
+        cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
+        val state = dbHelper.roomDao().getMusic(pos+1).isFavorite
+        var stateBoolean = false
+
+        if(state==1){
+            stateBoolean = true
+            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+            binding.cardBookmark.background = cardDrawableBookmark
+
+            binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
+        }else{
+            stateBoolean = false
+            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
+            binding.cardBookmark.background = cardDrawableBookmark
+
+            binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
         }
 
         binding.cardShuffle.setOnClickListener {
@@ -188,27 +199,23 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         binding.cardBookmark.setOnClickListener {
 
-            isFavorite = !isFavorite
+            stateBoolean = !stateBoolean
+            if (stateBoolean){
+                dbHelper.roomDao().setFavorite(1,pos+1)
 
-            var cardDrawable: Drawable = binding.cardBookmark.background
-            cardDrawable = DrawableCompat.wrap(cardDrawable)
-
-            var ivDrawable = binding.bookmarkIv.background
-            ivDrawable = DrawableCompat.wrap(ivDrawable)
-
-            if(isFavorite){
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-                binding.cardBookmark.background = cardDrawable
-
+                DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+                binding.cardBookmark.background = cardDrawableBookmark
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
-            }else{
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-                binding.cardBookmark.background = cardDrawable
 
+            }else{
+                dbHelper.roomDao().setFavorite(0,pos+1)
+
+                DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
+                binding.cardBookmark.background = cardDrawableBookmark
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+
             }
 
-            Toast.makeText(this, "bookmark", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardRepeat.setOnClickListener{
@@ -281,7 +288,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //play audio file
-    private fun playAudio(pos: Int,audioArrayList: ArrayList<ModelAudio>) {
+    private fun playAudio(pos: Int,audioArrayList: List<RoomAudioModel>) {
         try {
             val image = audioArrayList[pos].audioUri?.let { getAlbumArt(it) }
             if (image!=null){
@@ -334,7 +341,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //play previous audio
-    private fun prevAudio(audioArrayList:ArrayList<ModelAudio> ) {
+    private fun prevAudio(audioArrayList:List<RoomAudioModel> ) {
         if (audio_index > 0) {
             audio_index--
             playAudio(audio_index,audioArrayList)
@@ -347,7 +354,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //play next audio
-    private fun nextAudio(audioArrayList:ArrayList<ModelAudio> ) {
+    private fun nextAudio(audioArrayList:List<RoomAudioModel> ) {
         if (audio_index < audioArrayList.size - 1) {
             audio_index++
             playAudio(audio_index,audioArrayList)
@@ -360,7 +367,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //pause audio
-    private fun setPause(audioArrayList: ArrayList<ModelAudio>) {
+    private fun setPause(audioArrayList: List<RoomAudioModel>) {
         if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
@@ -386,33 +393,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             String.format("%02d:%02d", mns, scs)
         }
         return audioTime
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-    }
-
-    //release mediaplayer
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    //checking permission
-    private fun checkPermissions() {
-        Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(object : PermissionListener {
-                    override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-                    }
-
-                    override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {}
-                    override fun onPermissionRationaleShouldBeShown(
-                            permissionRequest: PermissionRequest,
-                            permissionToken: PermissionToken
-                    ) {
-                        // asking for permission
-                        permissionToken.continuePermissionRequest()
-                    }
-                }).check()
     }
 
 }

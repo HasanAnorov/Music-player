@@ -1,32 +1,31 @@
 package com.example.newdesignmusicplayer
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.Gravity
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.withStarted
 import com.example.newdesignmusicplayer.adapter.MusicListAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
-import com.example.newdesignmusicplayer.model.Folder
-import com.example.newdesignmusicplayer.model.ModelAudio
+import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
-import kotlin.collections.ArrayList
 
 class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicListAdapter
-    private lateinit var musicList :ArrayList<ModelAudio>
+    private lateinit var musicList :List<RoomAudioModel>
+    private lateinit var dbHelper: RoomDbHelper
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +33,7 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         binding = ActivityFolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+        dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -47,57 +47,58 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
 
         }
 
-        val folder = intent.getSerializableExtra("folder") as Folder
-        musicList = ArrayList()
-        musicList = folder.musicList
+        val folderName = intent.getStringExtra("folderName") as String
+        val folder = dbHelper.roomDao().getFolder(folderName)
+        musicList = folder.audioList
+
+
         binding.textView.text = "${musicList.size} tracks"
+        binding.tvFolderName.text = folderName
+        binding.btnArrow.elevation = 0F
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
             }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 onQueryTextChange(s.toString())
             }
-
             override fun afterTextChanged(s: Editable?) {
-
             }
         })
 
-            adapter =MusicListAdapter(this,this){  position: Int ->
-
-            val intent = Intent(this, MusicActivity::class.java)
-            intent.putExtra("musics", musicList)
-            intent.putExtra("pos", position)
-            startActivity(intent)
-        }
-
-        binding.recyclerView.setHasFixedSize(true)
-
-        adapter.differ.submitList(musicList)
-        binding.recyclerView.adapter = adapter
+           setAdapter(musicList,folderName)
 
         binding.btnArrow.setOnClickListener {
             onBackPressed()
         }
     }
 
+    private fun setAdapter(musicList:List<RoomAudioModel>,folderNameMusic:String){
+        adapter =MusicListAdapter(this,this){  position: Int ->
+
+            val intent = Intent(this, MusicActivity::class.java)
+            intent.putExtra("folderName",folderNameMusic)
+            intent.putExtra("position", position)
+            startActivity(intent)
+        }
+
+        adapter.differ.submitList(musicList)
+        binding.recyclerView.adapter = adapter
+    }
+
     fun onQueryTextChange(newText: String){
-        val folder = intent.getSerializableExtra("folder") as Folder
         val userInput = newText.toLowerCase(Locale.ROOT)
-        val myFiles = ArrayList<ModelAudio>()
-        for (song in folder.musicList) {
-            if (song.audioTitle!!.toLowerCase(Locale.ROOT).contains(userInput)){
+        val myFiles = arrayListOf<RoomAudioModel>()
+        for (song in musicList) {
+            if (song.audioTitle.toLowerCase(Locale.ROOT).contains(userInput)){
                 myFiles.add(song)
             }
         }
-         musicList = myFiles
+         //musicList = myFiles
          adapter.differ.submitList(myFiles)
     }
 
-    override fun onMenuItemClick(model: ModelAudio, position: Int,view:View) {
+    override fun onMenuItemClick(model: RoomAudioModel, position: Int,view:View) {
         val popupMenu = popupMenu {
             style = R.style.Widget_MPM_Menu_Dark_CustomBackground
             section {
@@ -125,5 +126,4 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
         }
         popupMenu.show(this, view)
     }
-
 }
