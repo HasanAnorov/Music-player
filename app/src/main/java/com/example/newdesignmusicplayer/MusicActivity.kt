@@ -23,6 +23,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
+import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.services.OnClearFromRecentService
 import java.io.Serializable
 
@@ -35,6 +36,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
+    private lateinit var dbHelper: RoomDbHelper
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -55,8 +57,11 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             window.navigationBarColor = getColor(R.color.musicActivity)
         }
 
-        val position = intent.getIntExtra("pos", 0)
-        audioArrayList = intent.getSerializableExtra("musics") as List<RoomAudioModel>
+        dbHelper  = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        val position = intent.getIntExtra("position", 0)
+        val folderName = intent.getStringExtra("folderName") as String
+        val folder = dbHelper.roomDao().getFolder(folderName)
+        audioArrayList = folder.audioList
 
         //checkPermissions()
         setAudio(position,audioArrayList)
@@ -66,16 +71,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                 val action = intent?.getStringExtra("actionname")
                 when(action){
                     CreateNotification().ACTION_NEXT -> {
-                        //Toast.makeText(context, "Notification Next", Toast.LENGTH_SHORT).show()
                         nextAudio(audioArrayList)
                     }
                     CreateNotification().ACTION_PLAY ->{
-                        //Toast.makeText(context, "Notification Play", Toast.LENGTH_SHORT).show()
                         setPause(audioArrayList)
                     }
                     CreateNotification().ACTION_PREVIOUS ->{
                         prevAudio(audioArrayList)
-                        //Toast.makeText(context, "Notification Previous", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -128,7 +130,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
-        var isFavorite = true
 
         audio_index = pos
 
@@ -179,15 +180,16 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         binding.cardBookmark.setOnClickListener {
 
-            isFavorite = !isFavorite
-
             var cardDrawable: Drawable = binding.cardBookmark.background
             cardDrawable = DrawableCompat.wrap(cardDrawable)
 
             var ivDrawable = binding.bookmarkIv.background
             ivDrawable = DrawableCompat.wrap(ivDrawable)
 
-            if(isFavorite){
+            val state = dbHelper.roomDao().getMusic(pos+1).isFavorite
+            //dbHelper.roomDao().setFavorite(pos+1,!state)
+
+            if(state){
                 DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
                 binding.cardBookmark.background = cardDrawable
 
@@ -199,7 +201,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
             }
 
-            Toast.makeText(this, "bookmark", Toast.LENGTH_SHORT).show()
         }
 
         binding.cardRepeat.setOnClickListener{
@@ -378,32 +379,5 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         }
         return audioTime
     }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-    }
-
-    //release mediaplayer
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    //checking permission
-//    private fun checkPermissions() {
-//        Dexter.withActivity(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-//                .withListener(object : PermissionListener {
-//                    override fun onPermissionGranted(permissionGrantedResponse: PermissionGrantedResponse) {
-//                    }
-//
-//                    override fun onPermissionDenied(permissionDeniedResponse: PermissionDeniedResponse) {}
-//                    override fun onPermissionRationaleShouldBeShown(
-//                            permissionRequest: PermissionRequest,
-//                            permissionToken: PermissionToken
-//                    ) {
-//                        // asking for permission
-//                        permissionToken.continuePermissionRequest()
-//                    }
-//                }).check()
-//    }
 
 }

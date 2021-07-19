@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#181C27"
+    android:background="@color/white"
     app:layoutDescription="@xml/activity_folder_scene"
     tools:context=".FolderActivity">
 
@@ -15,18 +15,18 @@
         android:layout_height="0dp"
         android:background="@drawable/back1"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.74" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/recyclerView" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginBottom="4dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@id/whiteBack"
+        app:layout_constraintTop_toBottomOf="@id/textView"
         tools:listitem="@layout/music_item_view" />
 
     <androidx.cardview.widget.CardView

@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.Toast
@@ -65,12 +66,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
         }
 
-
-
-
-
         binding.cardMenu.setOnClickListener {
-
             val dialog = AlertDialog.Builder(this).create()
             val dialogView = layoutInflater.inflate(R.layout.adding_folder_dialog_new, binding.root, false)
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -98,7 +94,8 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                     //do mentioned
                     val newRoomFolder = RoomFolderModel(folderName = folderName,audioList = listOf<RoomAudioModel>())
                     dbHelper.roomDao().insertFolder(newRoomFolder)
-                    //adapter.notifyItemInserted()
+                    adapter.notifyItemInserted(dbHelper.roomDao().getFoldersCount()-1)
+                    //adapter.notifyDataSetChanged()
                     dialog.dismiss()
                 }
             }
@@ -199,7 +196,12 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                             val folderName = et.text.toString()
                             if (et.text.isNullOrEmpty()){
                                 et.error = "Fill field"
-                            }else{
+                            }
+                            if (dbHelper.roomDao().checkForExists(folderName)){
+                                et.error = "Folder name exists !"
+                            }
+                            else{
+                                dbHelper.roomDao().setNewFolderName(folderName,folder.folderName)
                                 folder.folderName = folderName
                                 adapter.notifyDataSetChanged()
                                 dialog.dismiss()
@@ -213,8 +215,9 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                     iconDrawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_trash) //optional
                     iconColor =ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
                     callback = {
-                        //Do something to remove folder!
+
                         dbHelper.roomDao().deleteFolder(folder)
+                        adapter.notifyDataSetChanged()
                         //adapter.notifyItemRemoved(position)
                         //Toast.makeText(this@MainActivity, position, Toast.LENGTH_SHORT).show()
                     }
@@ -229,4 +232,5 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             intent.putExtra("folderName",folder.folderName)
             startActivity(intent)
     }
+
 }

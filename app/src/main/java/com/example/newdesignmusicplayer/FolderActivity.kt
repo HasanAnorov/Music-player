@@ -27,7 +27,6 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
     private lateinit var musicList :List<RoomAudioModel>
     private lateinit var dbHelper: RoomDbHelper
 
-    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,19 +66,19 @@ class FolderActivity : AppCompatActivity(),Serializable,OnEvenListener {
             }
         })
 
-           setAdapter(musicList)
+           setAdapter(musicList,folderName)
 
         binding.btnArrow.setOnClickListener {
             onBackPressed()
         }
     }
 
-    private fun setAdapter(musicList:List<RoomAudioModel>){
+    private fun setAdapter(musicList:List<RoomAudioModel>,folderNameMusic:String){
         adapter =MusicListAdapter(this,this){  position: Int ->
 
             val intent = Intent(this, MusicActivity::class.java)
-            intent.putExtra("musics", musicList as Serializable)
-            intent.putExtra("pos", position)
+            intent.putExtra("folderName",folderNameMusic)
+            intent.putExtra("position", position)
             startActivity(intent)
         }
 

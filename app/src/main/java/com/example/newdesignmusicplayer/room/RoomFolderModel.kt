@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import java.io.Serializable
 import java.util.*
 
-@Entity(tableName = "folder")
+@Entity()
 data class RoomFolderModel (
         @ColumnInfo(name = "folderName")
         var folderName :String ,
