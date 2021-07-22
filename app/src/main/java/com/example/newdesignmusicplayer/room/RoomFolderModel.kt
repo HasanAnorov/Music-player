@@ -11,7 +11,7 @@ data class RoomFolderModel (
         @ColumnInfo(name = "folderName")
         var folderName :String ,
         @ColumnInfo(name = "audioList")
-        var audioList:List<RoomAudioModel>
+        var audioList:List<RoomAudioModel>,
 ):Serializable{
         @PrimaryKey(autoGenerate = true)
         var id :Int =0

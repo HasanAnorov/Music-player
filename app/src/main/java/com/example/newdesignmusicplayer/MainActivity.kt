@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                                 val artist: String = cursor.getString(cursor.getColumnIndex(
                                     MediaStore.Audio.Media.ARTIST))
                                 val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = 0)
+                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = 0,isSelected = false)
                                 dbHelper.roomDao().insertMusic(roomAudio)
 
                             } while (cursor.moveToNext())
@@ -147,13 +147,10 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                         }
                     }
 
-                val roomFolderModel =RoomFolderModel(folderName = "Your musics",audioList = dbHelper.roomDao().getMusics())
-
-                dbHelper.roomDao().insertFolder(roomFolderModel)
-
+                dbHelper.roomDao().insertFolder(RoomFolderModel(folderName = "Your musics",audioList = dbHelper.roomDao().getMusics()))
+                dbHelper.roomDao().insertFolder(RoomFolderModel(folderName = "Favorites",audioList = listOf<RoomAudioModel>()))
 
                 val folders = dbHelper.roomDao().getFolders()
-
                 if (folders != null) {
                     setAdapter(folders)
                 }

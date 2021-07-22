@@ -12,4 +12,7 @@
     <string name="folder_name">Folder name</string>
     <string name="add_your_favorite_playlist">Add your favorite playlist</string>
     <string name="_214_tracks">214 tracks</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="share">Share</string>
 </resources>
