@@ -6,13 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.newdesignmusicplayer.interfaces.OnFolderListener
+import com.example.newdesignmusicplayer.interfaces.OnFolderForSelection
 import com.example.newdesignmusicplayer.databinding.FolderItemViewBinding
 import com.example.newdesignmusicplayer.room.RoomFolderModel
 import java.io.Serializable
 
-
-class FolderAdapter(val listener: OnFolderListener): RecyclerView.Adapter<FolderAdapter.ViewHolderHomeFragment>() ,Serializable{
+class AdapterForFolderSelection(val listener: OnFolderForSelection): RecyclerView.Adapter<AdapterForFolderSelection.ViewHolderHomeFragment>() , Serializable {
 
     private val itemCallback = object : DiffUtil.ItemCallback<RoomFolderModel>(){
         override fun areItemsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
@@ -28,22 +27,18 @@ class FolderAdapter(val listener: OnFolderListener): RecyclerView.Adapter<Folder
 
 
     inner class ViewHolderHomeFragment(private  var binding: FolderItemViewBinding): RecyclerView.ViewHolder(binding.root){
-        fun onBind(model: RoomFolderModel){
+        fun onBind(model: RoomFolderModel,position: Int){
             binding.folderName.text = model.folderName
 
             //do mentioned
             binding.folderSongs.text = "${model.audioList?.size} tracks"
-            binding.cardMenu.elevation = 0F
+            binding.cardMenu.visibility = View.GONE
 
             binding.root.setOnClickListener {
-                listener.onFolderClick(model)
+                listener.onFolderForSelectionClick(model,position)
             }
             if (model.folderName == "Your musics"||model.folderName=="Favorites"){
                 binding.cardMenu.visibility = View.GONE
-            }
-
-            binding.cardMenu.setOnClickListener {
-                listener.onFolderItemClick(binding.cardMenu,model,adapterPosition)
             }
         }
     }
@@ -57,6 +52,7 @@ class FolderAdapter(val listener: OnFolderListener): RecyclerView.Adapter<Folder
     override fun getItemCount(): Int = differ.currentList.size
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
-        holder.onBind(differ.currentList[position])
+        holder.onBind(differ.currentList[position],position)
     }
+
 }

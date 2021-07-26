@@ -30,7 +30,6 @@
             android:layout_gravity="center"
             android:visibility="visible"
             android:background="@drawable/ic_menu"
-            android:backgroundTint="#DB000000"
             android:focusable="false" />
 
         <ImageView
@@ -39,8 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:background="@drawable/ic_verified"
-            android:backgroundTint="#DB000000"
+            android:background="@drawable/ic_check__2_"
             android:focusable="false" />
 
     </androidx.cardview.widget.CardView>

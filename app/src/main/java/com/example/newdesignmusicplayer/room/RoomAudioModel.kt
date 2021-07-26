@@ -2,6 +2,7 @@ package com.example.newdesignmusicplayer.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity
 data class RoomAudioModel (
@@ -11,7 +12,7 @@ data class RoomAudioModel (
     var audioUri: String,
     var isFavorite:Int,
     var isSelected:Boolean
-){
+):Serializable{
     @PrimaryKey(autoGenerate = true)
     var id :Int = 0
 }

@@ -5,9 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#181C27"
+    android:background="@color/main_light"
     app:layoutDescription="@xml/activity_folder_scene"
-    tools:context=".FolderActivity">
+    tools:context=".ui.FolderActivity">
 
     <LinearLayout
         android:id="@+id/whiteBack"
@@ -16,7 +16,8 @@
         android:background="@drawable/back1"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.74" />
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/textView" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -34,9 +35,9 @@
         android:layout_width="46dp"
         android:layout_height="46dp"
         android:elevation="@null"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:backgroundTint="#181C27"
+        android:backgroundTint="@color/main_light"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
@@ -50,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/ic_back"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/black"
             android:focusable="false" />
 
     </androidx.cardview.widget.CardView>
@@ -58,7 +59,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_sheet"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/white"
+        android:background="@color/main_light"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -71,8 +72,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="2dp"
             android:focusable="true"
             android:clickable="true"
             app:cardCornerRadius="9dp"
@@ -83,16 +84,19 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:padding="6dp"
+                android:background="@color/main_light"
                 android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/addIv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:focusable="false"
                     android:clickable="false"
+
                     android:backgroundTint="#272727"
-                    android:src="@drawable/ic_add__8_"
+                    android:src="@drawable/ic_add__9_"
+                    android:layout_marginTop="10dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -107,6 +111,7 @@
                     android:focusable="false"
                     android:clickable="false"
                     android:textStyle="normal"
+                    android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="@id/addIv"
                     app:layout_constraintStart_toStartOf="@id/addIv"
                     app:layout_constraintTop_toBottomOf="@id/addIv" />
@@ -121,10 +126,10 @@
             app:layout_constraintStart_toEndOf="@id/addCard"
             app:layout_constraintEnd_toStartOf="@id/deleteCard"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="2dp"
             android:focusable="true"
             android:clickable="true"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="2dp"
             app:cardCornerRadius="9dp"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="0dp"
@@ -133,6 +138,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:padding="6dp"
+                android:background="@color/main_light"
                 android:layout_height="match_parent">
 
                 <ImageView
@@ -140,6 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:focusable="false"
+                    android:layout_marginTop="10dp"
                     android:clickable="false"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -154,6 +161,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/share"
                     android:textStyle="normal"
+                    android:layout_marginTop="8dp"
                     android:focusable="false"
                     android:clickable="false"
                     android:fontFamily="sans-serif-condensed"
@@ -170,19 +178,20 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:layout_constraintStart_toEndOf="@id/shareCard"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
             app:cardCornerRadius="9dp"
             android:focusable="true"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/selectCard"
             android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:padding="6dp"
+                android:background="@color/main_light"
                 android:layout_height="match_parent">
 
                 <ImageView
@@ -191,6 +200,7 @@
                     android:layout_height="wrap_content"
                     android:focusable="false"
                     android:clickable="false"
+                    android:layout_marginTop="10dp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -200,6 +210,7 @@
                     android:textSize="16sp"
                     android:focusable="false"
                     android:clickable="false"
+                    android:layout_marginTop="8dp"
                     android:textColor="@color/black"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -214,15 +225,70 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/selectCard"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:layout_constraintStart_toEndOf="@id/deleteCard"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="9dp"
+            android:focusable="true"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="48dp"
+            app:layout_constraintEnd_toStartOf="@id/selectedMusicCount"
+            android:layout_height="48dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:padding="6dp"
+                android:background="@color/main_light"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:src="@drawable/ic_dry_clean"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:clickable="false"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:id="@+id/selectAllIv" />
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/selectedMusicCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:padding="4dp"
+            android:textStyle="normal"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginEnd="36dp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/selectCard"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/search_card"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:background="#232837"
+        android:background="#656565"
         app:cardCornerRadius="9dp"
         app:layout_constraintBottom_toBottomOf="@id/btn_arrow"
         app:layout_constraintEnd_toEndOf="parent"
@@ -232,7 +298,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#232837">
+            android:background="@color/white">
 
             <ImageView
                 android:id="@+id/search_icon"
@@ -240,11 +306,10 @@
                 android:layout_height="20dp"
                 android:layout_marginStart="20dp"
                 android:background="@drawable/search"
-                android:backgroundTint="@color/white"
+                android:backgroundTint="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
 
             <EditText
                 android:id="@+id/et_search"
@@ -253,25 +318,23 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="8dp"
                 android:background="@null"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:clickable="true"
                 android:focusable="true"
                 android:hint="@string/search"
                 android:maxLines="1"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:textColorHint="@color/white"
+                android:textColorHint="@color/black"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/search_icon"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
-
 
     <TextView
         android:id="@+id/tv_folder_name"
@@ -282,7 +345,7 @@
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:text="Ambient"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/whiteBack"
@@ -297,7 +360,7 @@
         android:paddingStart="4dp"
         android:paddingEnd="4dp"
         android:text="72 tracks"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
         android:windowSoftInputMode="adjustNothing"

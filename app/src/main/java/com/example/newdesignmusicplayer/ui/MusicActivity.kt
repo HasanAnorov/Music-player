@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -21,6 +21,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
+import com.example.newdesignmusicplayer.utils.CreateNotification
+import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
@@ -303,7 +305,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             mediaPlayer.reset()
 
             //set file path
-            CreateNotification().createNotification(this,audioArrayList[pos],R.drawable.ic_pause)
+            CreateNotification().createNotification(this,audioArrayList[pos], R.drawable.ic_pause)
             mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
             mediaPlayer.prepare()
             mediaPlayer.start()
@@ -371,12 +373,12 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
-            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_play_button_arrowhead)
+            CreateNotification().createNotification(this,audioArrayList[audio_index], R.drawable.ic_play_button_arrowhead)
             //Toast.makeText(this, audioArrayList[audio_index].audioDuration, Toast.LENGTH_SHORT).show()
         } else {
             mediaPlayer.start()
             binding.playPause.setImageResource(R.drawable.ic_pause)
-            CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+            CreateNotification().createNotification(this,audioArrayList[audio_index], R.drawable.ic_pause)
         }
     }
 

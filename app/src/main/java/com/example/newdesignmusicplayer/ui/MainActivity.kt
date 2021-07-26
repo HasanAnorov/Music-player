@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.*
 import android.widget.EditText
 import android.widget.Toast
@@ -21,21 +20,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.adapter.FolderAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
+import com.example.newdesignmusicplayer.interfaces.OnFolderListener
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.room.RoomFolderModel
+import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
 
-class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
+class MainActivity : AppCompatActivity(), OnFolderListener,Serializable {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: FolderAdapter
     val STORAGE_PERMISSION_CODE = 1
     private lateinit var dbHelper: RoomDbHelper
+    private lateinit var viewModel:MediaViewModel
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
@@ -45,9 +49,12 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+
         dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
         adapter = FolderAdapter(this)
         dbHelper.roomDao().getFolders()?.let { setAdapter(it) }
+        binding.cardMenu.elevation = 0F
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -82,7 +89,6 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
             dialog.show()
 
-
             no.setOnClickListener {
                 dialog.dismiss()
             }
@@ -99,9 +105,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                     dialog.dismiss()
                 }
             }
-
         }
-
     }
 
     private  fun setAdapter(folders:List<RoomFolderModel>){
@@ -167,9 +171,9 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             section {
                 item {
                     label = "Rename"
-                    labelColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    labelColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     icon = R.drawable.ic_edit__2_ //optional
-                    iconColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    iconColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     callback = { //optional
                         val dialog = AlertDialog.Builder(this@MainActivity).create()
                         val dialogView = layoutInflater.inflate(R.layout.change_folder_dialog, binding.root, false)
@@ -208,9 +212,9 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                 }
                 item {
                     labelRes = R.string.remove
-                    labelColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    labelColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     iconDrawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_trash) //optional
-                    iconColor =ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    iconColor =ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     callback = {
 
                         dbHelper.roomDao().deleteFolder(folder)
@@ -229,5 +233,4 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             intent.putExtra("folderName",folder.folderName)
             startActivity(intent)
     }
-
 }

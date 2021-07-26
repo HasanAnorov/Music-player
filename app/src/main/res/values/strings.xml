@@ -15,4 +15,5 @@
     <string name="add">Add</string>
     <string name="delete">Delete</string>
     <string name="share">Share</string>
+    <string name="select_all">Select all</string>
 </resources>

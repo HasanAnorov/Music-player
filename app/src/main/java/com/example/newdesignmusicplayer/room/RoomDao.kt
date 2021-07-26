@@ -40,4 +40,7 @@ interface RoomDao {
     @Delete()
     fun deleteFolder(roomFolderModel: RoomFolderModel)
 
+    @Update
+    fun updateFolder(folder:RoomFolderModel )
+
 }

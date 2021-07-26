@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.utils
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -10,6 +10,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.services.NotificationActionService
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 
@@ -42,7 +43,7 @@ class CreateNotification {
 //                    .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
 //                    .build())
 
-            val icon = BitmapFactory.decodeResource(context.resources,R.drawable.music_photo)
+            val icon = BitmapFactory.decodeResource(context.resources, R.drawable.music_photo)
 
             val pendingIntentPrevious: PendingIntent?
             val drw_previous: Int?
