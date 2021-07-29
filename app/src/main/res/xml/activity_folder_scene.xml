@@ -1,50 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<MotionScene 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:app="urn:oasis:names:tc:xliff:document:1.2">
 
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
         motion:duration="1000">
-       <KeyFrameSet>
+        <KeyFrameSet>
 
-           <KeyAttribute
-               motion:motionTarget="@+id/tv_folder_name"
-               motion:framePosition="100"
-               android:alpha="0" />
-           <KeyAttribute
-               motion:motionTarget="@+id/textView"
-               motion:framePosition="100"
-               android:alpha="0" />
-       </KeyFrameSet>
-        <OnSwipe
-            motion:dragScale="0.001"
-            motion:touchAnchorId="@+id/recyclerView"
-            motion:dragDirection="dragUp"
-            motion:touchAnchorSide="top" />
-
+            <KeyAttribute
+                motion:motionTarget="@+id/tv_folder_name"
+                motion:framePosition="100"
+                android:alpha="0" />
+            <KeyAttribute
+                motion:motionTarget="@+id/textView"
+                motion:framePosition="100"
+                android:alpha="0" />
+        </KeyFrameSet>
+        <OnSwipe motion:touchAnchorId="@+id/whiteBack" />
     </Transition>
 
-    <ConstraintSet android:id="@+id/start">
-        <Constraint
-            motion:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            motion:layout_constraintTop_toBottomOf="@id/search_card"
-            android:layout_marginStart="24dp"
-            motion:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="48dp"
-            android:id="@+id/tv_folder_name" />
+
+
+    <ConstraintSet android:id="@+id/start" >
         <Constraint
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            motion:visibilityMode="ignore"
             motion:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="4dp"
-            motion:layout_constraintTop_toBottomOf="@id/textView"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="2dp"
+            motion:layout_constraintTop_toTopOf="@id/whiteBack"
+            android:layout_marginTop="0dp"
             android:id="@+id/recyclerView" />
+
+        <Constraint
+            android:id="@+id/bottom_sheet"
+            android:layout_height="wrap_content"
+            motion:visibilityMode="ignore"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent">
+            <PropertySet
+                app:applyMotionScene="false"
+                app:visibilityMode="ignore" />
+        </Constraint>
+        <Constraint
+            motion:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/constraintLayout" />
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@id/whiteBack"
+            android:layout_marginEnd="32dp"
+            motion:layout_constraintTop_toBottomOf="@id/search_card"
+            android:id="@+id/tv_folder_name"
+            android:layout_marginBottom="0dp"
+            android:layout_marginTop="24dp" />
+
+        <!--        <Constraint-->
+<!--            android:id="@+id/tv_folder_name"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            motion:layout_constraintTop_toBottomOf="@id/search_card"-->
+<!--            motion:visibilityMode="ignore"-->
+<!--            android:layout_marginEnd="16dp"-->
+<!--            android:layout_marginRight="16dp"-->
+<!--            motion:layout_constraintBottom_toTopOf="@id/whiteBack"-->
+<!--            motion:layout_constraintEnd_toEndOf="parent"-->
+<!--            motion:layout_constraintVertical_bias="0.55">-->
+
+<!--            <PropertySet app:applyMotionScene="false"-->
+<!--                app:visibilityMode="ignore" />-->
+
+<!--        </Constraint>-->
+
     </ConstraintSet>
 
     <ConstraintSet android:id="@+id/end">
@@ -52,9 +85,11 @@
             android:id="@+id/whiteBack"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            motion:layout_constraintTop_toTopOf="parent"
-            motion:layout_constraintBottom_toTopOf="@id/recyclerView"
-            android:layout_marginBottom="2dp" />
+            motion:visibilityMode="ignore"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintHeight_percent="0"
+            motion:layout_constraintTop_toBottomOf="@id/search_card"
+            android:layout_marginTop="16dp" />
         <Constraint
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
@@ -62,7 +97,8 @@
             android:id="@+id/tv_folder_name"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            motion:layout_constraintStart_toStartOf="@id/search_card" />
+            motion:layout_constraintStart_toStartOf="@id/search_card" >
+        </Constraint>
         <Constraint
             android:layout_height="wrap_content"
             motion:layout_constraintEnd_toEndOf="parent"
@@ -103,12 +139,23 @@
             motion:layout_constraintTop_toTopOf="@id/btn_arrow"
             android:id="@+id/search_card" />
         <Constraint
-            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             motion:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="2dp"
-            motion:layout_constraintTop_toBottomOf="@id/btn_arrow"
-            android:layout_marginTop="38dp" />
+            android:layout_marginBottom="4dp"
+            motion:layout_constraintTop_toTopOf="@id/whiteBack"
+            android:layout_marginTop="0dp"
+            android:id="@+id/recyclerView" />
+        <Constraint
+            android:id="@+id/bottom_sheet"
+            android:layout_height="wrap_content"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent">
+<!--            <PropertySet-->
+<!--                app:applyMotionScene="false"-->
+<!--                app:visibilityMode="ignore" />-->
+        </Constraint>
     </ConstraintSet>
 </MotionScene>

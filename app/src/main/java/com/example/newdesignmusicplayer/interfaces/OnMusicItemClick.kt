@@ -1,9 +1,11 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.interfaces
 
 import android.view.View
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import java.io.Serializable
 
-interface OnEvenListener : Serializable {
+interface OnMusicItemClick : Serializable {
     fun onMenuItemClick(model:RoomAudioModel,position: Int,view:View)
+    fun onMusicModelLongClick(position: Int)
+
 }

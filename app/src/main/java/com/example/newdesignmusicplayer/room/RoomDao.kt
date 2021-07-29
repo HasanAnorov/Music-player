@@ -1,43 +1,49 @@
 package com.example.newdesignmusicplayer.room
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.*
-
 
 @Dao
 interface RoomDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertMusic(roomAudioModel: RoomAudioModel)
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    suspend fun insertMusic(roomAudioModel: RoomAudioModel)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertFolder(roomFolderModel: RoomFolderModel)
+    suspend fun insertMusics(musics: List<RoomAudioModel>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFolder(roomFolderModel: RoomFolderModel)
 
     @Query("UPDATE RoomFolderModel SET folderName = :newFolderName WHERE folderName = :oldFolderName")
-    fun setNewFolderName(newFolderName: String, oldFolderName: String)
+    suspend fun setNewFolderName(newFolderName: String, oldFolderName: String)
 
     @Query("UPDATE ROOMAUDIOMODEL SET isFavorite= :intState WHERE id = :position")
-    fun setFavorite(intState:Int,position: Int)
+    suspend fun setFavorite(intState:Int,position: Int)
 
     @Query("SELECT EXISTS ( SELECT * FROM roomfoldermodel WHERE folderName = :newFolderName)")
-    fun checkForExists(newFolderName: String):Boolean
+    suspend fun checkForExists(newFolderName: String):Boolean
 
     @Query("select * from roomaudiomodel")
-    fun getMusics():List<RoomAudioModel>
+    fun getMusics():LiveData<List<RoomAudioModel>>
 
     @Query("select * from roomfoldermodel")
-    fun getFolders():List<RoomFolderModel>?
+    fun getFolders():LiveData<List<RoomFolderModel>>
 
     @Query("SELECT COUNT(*) FROM roomfoldermodel")
-    fun getFoldersCount():Int
+    suspend fun getFoldersCount():Int
 
     @Query("SELECT * FROM roomfoldermodel WHERE folderName = :name ")
-    fun getFolder(name: String):RoomFolderModel
+    suspend fun getFolder(name: String):RoomFolderModel
 
     @Query("SELECT * FROM roomaudiomodel WHERE id = :position")
     fun getMusic(position:Int):RoomAudioModel
 
     @Delete()
-    fun deleteFolder(roomFolderModel: RoomFolderModel)
+    suspend fun deleteFolder(roomFolderModel: RoomFolderModel)
+
+    @Update
+    suspend fun updateFolder(folder:RoomFolderModel )
 
 }

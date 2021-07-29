@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -21,21 +21,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModelProvider
+import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.adapter.FolderAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityMainBinding
+import com.example.newdesignmusicplayer.interfaces.OnFolderListener
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.room.RoomFolderModel
+import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
 
-class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
+class MainActivity : AppCompatActivity(), OnFolderListener,Serializable {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: FolderAdapter
-    val STORAGE_PERMISSION_CODE = 1
-    private lateinit var dbHelper: RoomDbHelper
+    private val STORAGE_PERMISSION_CODE = 1
+    private lateinit var viewModel:MediaViewModel
 
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("Recycle")
@@ -45,9 +50,8 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
         setContentView(binding.root)
         supportActionBar?.hide()
 
-        dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
-        adapter = FolderAdapter(this)
-        dbHelper.roomDao().getFolders()?.let { setAdapter(it) }
+        viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+        binding.cardMenu.elevation = 0F
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -64,6 +68,10 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
         if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
+        }else{
+            viewModel.folders.observe(this){
+                setAdapter(it)
+            }
         }
 
         binding.cardMenu.setOnClickListener {
@@ -82,7 +90,6 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
             dialog.show()
 
-
             no.setOnClickListener {
                 dialog.dismiss()
             }
@@ -92,23 +99,31 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                     et.error = "Fill field"
                 }else{
                     //do mentioned
-                    val newRoomFolder = RoomFolderModel(folderName = folderName,audioList = listOf<RoomAudioModel>())
-                    dbHelper.roomDao().insertFolder(newRoomFolder)
-                    adapter.notifyItemInserted(dbHelper.roomDao().getFoldersCount()-1)
+                    val newRoomFolder = RoomFolderModel(folderName = folderName,audioList = emptyList() )
+                    insertFolderToDatabase(newRoomFolder)
+                    adapter.notifyItemInserted(viewModel.getFoldersCount()-1)
                     //adapter.notifyDataSetChanged()
                     dialog.dismiss()
                 }
             }
-
         }
-
     }
 
-    private  fun setAdapter(folders:List<RoomFolderModel>){
-        adapter.differ.submitList(folders)
+    private fun insertMusicsToDatabase(musics: List<RoomAudioModel>){
+        viewModel.insertMusics(musics)
+    }
+
+    private fun insertFolderToDatabase(roomFolderModel: RoomFolderModel){
+        viewModel.insertFolder(roomFolderModel)
+    }
+
+    private  fun setAdapter(folders: List<RoomFolderModel>){
+        adapter = FolderAdapter(this,folders)
+        adapter.folders = folders
         binding.recyclerView.adapter=adapter
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
@@ -119,6 +134,7 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                     val contentResolver = this.contentResolver
                     val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                     val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+                    val musics = mutableListOf<RoomAudioModel>()
 
                     //looping through all rows and adding to list
                     when{
@@ -133,29 +149,32 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
 
                         }
                         else ->{
+                            Toast.makeText(this, "adding started", Toast.LENGTH_SHORT).show()
                             do {
-                                val title: String = cursor.getString(cursor.getColumnIndex(
-                                    MediaStore.Audio.Media.TITLE))
-                                val artist: String = cursor.getString(cursor.getColumnIndex(
-                                    MediaStore.Audio.Media.ARTIST))
+                                val title: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                                val artist: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                                 val url: String = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = 0)
-                                dbHelper.roomDao().insertMusic(roomAudio)
-
+                                val roomAudio= RoomAudioModel(audioTitle = title,audioDuration = "null",audioArtist = artist,audioUri = url,isFavorite = 0,isSelected = false)
+                                musics.add(roomAudio)
+                                //insertMusicToDatabase(roomAudio)
+//                                viewModel.musics.observe(this){
+//                                    it.toMutableList().add(roomAudio)
+//                                }
+                                Log.d("INSERTING",roomAudio.audioTitle)
+                                
                             } while (cursor.moveToNext())
+                            insertMusicsToDatabase(musics)
+//                            viewModel.musics.observe(this){
+                                Log.d("INSERTING_FOLDER","1")
+                                insertFolderToDatabase(RoomFolderModel(folderName = "Your musics",audioList = musics))
+                                insertFolderToDatabase(RoomFolderModel(folderName = "Favorites",audioList = listOf()))
+                          //  }
                             cursor.close()
                         }
                     }
-
-                val roomFolderModel =RoomFolderModel(folderName = "Your musics",audioList = dbHelper.roomDao().getMusics())
-
-                dbHelper.roomDao().insertFolder(roomFolderModel)
-
-
-                val folders = dbHelper.roomDao().getFolders()
-
-                if (folders != null) {
-                    setAdapter(folders)
+                viewModel.folders.observe(this){
+                    Log.d("INSERTING_FOLDER","2")
+                    setAdapter(it)
                 }
                 Toast.makeText(this@MainActivity, "Storage Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
@@ -170,9 +189,9 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             section {
                 item {
                     label = "Rename"
-                    labelColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    labelColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     icon = R.drawable.ic_edit__2_ //optional
-                    iconColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    iconColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     callback = { //optional
                         val dialog = AlertDialog.Builder(this@MainActivity).create()
                         val dialogView = layoutInflater.inflate(R.layout.change_folder_dialog, binding.root, false)
@@ -197,11 +216,11 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                             if (et.text.isNullOrEmpty()){
                                 et.error = "Fill field"
                             }
-                            if (dbHelper.roomDao().checkForExists(folderName)){
+                            if (viewModel.checkForExist(folderName)){
                                 et.error = "Folder name exists !"
                             }
                             else{
-                                dbHelper.roomDao().setNewFolderName(folderName,folder.folderName)
+                                viewModel.setNewFolderName(folderName,folder.folderName)
                                 folder.folderName = folderName
                                 adapter.notifyDataSetChanged()
                                 dialog.dismiss()
@@ -211,12 +230,12 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
                 }
                 item {
                     labelRes = R.string.remove
-                    labelColor = ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    labelColor = ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     iconDrawable = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_trash) //optional
-                    iconColor =ContextCompat.getColor(this@MainActivity,R.color.folderActivity)
+                    iconColor =ContextCompat.getColor(this@MainActivity, R.color.folderActivity)
                     callback = {
 
-                        dbHelper.roomDao().deleteFolder(folder)
+                        viewModel.deleteFolder(folder)
                         adapter.notifyDataSetChanged()
                         //adapter.notifyItemRemoved(position)
                         //Toast.makeText(this@MainActivity, position, Toast.LENGTH_SHORT).show()
@@ -232,5 +251,4 @@ class MainActivity : AppCompatActivity(),OnFolderListener,Serializable {
             intent.putExtra("folderName",folder.folderName)
             startActivity(intent)
     }
-
 }

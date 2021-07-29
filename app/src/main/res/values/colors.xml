@@ -13,5 +13,6 @@
     <color name="main_light">#EFEFEF</color>
     <color name="shuffleColor">#686A76</color>
     <color name="folderActivity">#181C27</color>
+    <color name="folder_item_view_color">#F6F6F6</color>
 
 </resources>

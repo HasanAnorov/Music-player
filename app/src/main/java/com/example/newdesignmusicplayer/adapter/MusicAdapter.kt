@@ -2,18 +2,21 @@ package com.example.newdesignmusicplayer.adapter
 
 import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.newdesignmusicplayer.OnEvenListener
-import com.example.newdesignmusicplayer.R
+import com.example.newdesignmusicplayer.interfaces.OnMusicItemClick
 import com.example.newdesignmusicplayer.databinding.MusicItemViewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 
-class MusicListAdapter(private val context:Context,val listener:OnEvenListener, val itemClick: ( pos: Int) -> Unit): RecyclerView.Adapter<MusicListAdapter.ViewHolderHomeFragment>() {
+
+class MusicAdapter(
+        private val context: Context,
+        val listener: OnMusicItemClick,
+        val itemClick: (pos: Int) -> Unit
+): RecyclerView.Adapter<MusicAdapter.ViewHolderHomeFragment>() {
 
     private val itemCallback = object : DiffUtil.ItemCallback<RoomAudioModel>(){
         override fun areItemsTheSame(oldItem: RoomAudioModel, newItem: RoomAudioModel): Boolean {
@@ -28,19 +31,41 @@ class MusicListAdapter(private val context:Context,val listener:OnEvenListener, 
     var differ = AsyncListDiffer(this, itemCallback)
 
     inner class ViewHolderHomeFragment(private var binding: MusicItemViewBinding): RecyclerView.ViewHolder(binding.root){
+
         fun onBind(model: RoomAudioModel, position: Int){
 
+            val image = getAlbumArt(differ.currentList[position].audioUri)
             binding.musicName.text = model.audioTitle
             binding.musicAuthor.text = model.audioArtist
             binding.cardMenu.elevation = 0F
+            binding.cardMusicPhoto.elevation = 0F
+
+            if (image!=null){
+                Glide.with(context).asBitmap().load(image).into(binding.onGoingMusicImage)
+            }
+            if (model.isSelected){
+                binding.ivBack.visibility = View.GONE
+                binding.ivSelector.visibility = View.VISIBLE
+                binding.cardMenu.isEnabled = false
+            }else{
+                binding.ivBack.visibility = View.VISIBLE
+                binding.ivSelector.visibility = View.GONE
+                binding.cardMenu.isEnabled = true
+            }
 
             binding.cardMenu.setOnClickListener {
-                listener.onMenuItemClick(model,position,binding.cardMenu)
+                listener.onMenuItemClick(model, position, binding.cardMenu)
             }
             binding.root.setOnClickListener {
-                itemClick.invoke( position)
+                    itemClick.invoke(position)
+            }
+            binding.root.setOnLongClickListener {
+                listener.onMusicModelLongClick(position)
+
+                return@setOnLongClickListener true
             }
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderHomeFragment {
@@ -53,13 +78,6 @@ class MusicListAdapter(private val context:Context,val listener:OnEvenListener, 
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
         holder.onBind(differ.currentList[position], position)
-
-        val image = differ.currentList[position].audioUri?.let {
-            getAlbumArt(it)
-        }
-        if (image!=null){
-            Glide.with(context).asBitmap().load(image).into(holder.itemView.findViewById(R.id.onGoingMusicImage))
-        }
     }
 
     private fun getAlbumArt(uri: String): ByteArray? {

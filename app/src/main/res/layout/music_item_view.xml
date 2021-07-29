@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/parentCardLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="10dp"
+    android:padding="12dp"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -19,21 +21,27 @@
         android:padding="6dp"
         android:focusable="true"
         android:foreground="?android:attr/selectableItemBackground"
-        app:cardCornerRadius="20dp"
-        >
+        app:cardCornerRadius="20dp">
 
         <ImageView
             android:id="@+id/iv_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="visible"
             android:background="@drawable/ic_menu"
-            android:backgroundTint="#DB000000"
+            android:focusable="false" />
+
+        <ImageView
+            android:id="@+id/iv_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:background="@drawable/ic_check__2_"
             android:focusable="false" />
 
     </androidx.cardview.widget.CardView>
-
-
 
     <TextView
         android:id="@+id/musicName"
@@ -67,9 +75,6 @@
         app:layout_constraintEnd_toStartOf="@id/card_menu"
         android:layout_marginEnd="16dp"/>
 
-
-
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardMusicPhoto"
         android:layout_width="54dp"
@@ -90,8 +95,6 @@
             android:scaleType="fitXY"
             android:layout_gravity="center"/>
 
-
     </androidx.cardview.widget.CardView>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

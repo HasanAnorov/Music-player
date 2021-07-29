@@ -1,4 +1,4 @@
-package com.example.newdesignmusicplayer
+package com.example.newdesignmusicplayer.interfaces
 
 import android.view.View
 import com.example.newdesignmusicplayer.room.RoomFolderModel
