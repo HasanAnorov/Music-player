@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.newdesignmusicplayer.utils.CreateNotification
 import com.example.newdesignmusicplayer.R
@@ -27,6 +28,7 @@ import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.services.OnClearFromRecentService
+import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import java.io.Serializable
 
 open class MusicActivity : AppCompatActivity(),Serializable {
@@ -38,8 +40,8 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
-    private lateinit var dbHelper: RoomDbHelper
-
+    //private lateinit var dbHelper: RoomDbHelper
+    private lateinit var viewModel:MediaViewModel
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +49,8 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         binding = ActivityMusicNewBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
 
         binding.cardBookmark.elevation = 0F
         binding.cardAddToList.elevation = 0F
@@ -59,14 +63,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             window.navigationBarColor = getColor(R.color.musicActivity)
         }
 
-        dbHelper  = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        //dbHelper  = RoomDbHelper.DatabaseBuilder.getInstance(this)
         val position = intent.getIntExtra("position", 0)
         val folderName = intent.getStringExtra("folderName") as String
-        val folder = dbHelper.roomDao().getFolder(folderName)
-        audioArrayList = folder.audioList
-
-        //checkPermissions()
-        setAudio(position,audioArrayList)
+        viewModel.getFolder(folderName).observe(this){
+            audioArrayList = it.audioList
+            setAudio(position,audioArrayList)
+        }
 
         val broadcastReceiver = object :BroadcastReceiver(){
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -148,111 +151,114 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             )
         }
 
-        var cardDrawableBookmark: Drawable = binding.cardBookmark.background
-        cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
-        val state = dbHelper.roomDao().getMusic(pos+1).isFavorite
-        var stateBoolean = false
+        viewModel.getMusic(pos+1).observe(this){
 
-        if(state==1){
-            stateBoolean = true
-            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
-            binding.cardBookmark.background = cardDrawableBookmark
+            var cardDrawableBookmark: Drawable = binding.cardBookmark.background
+            cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
 
-            binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
-        }else{
-            stateBoolean = false
-            DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
-            binding.cardBookmark.background = cardDrawableBookmark
+            val state = it.isFavorite
+            var stateBoolean = false
+            if(state==1){
+                stateBoolean = true
+                //DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+                //binding.cardBookmark.background = cardDrawableBookmark
 
-            binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
-        }
-
-        binding.cardShuffle.setOnClickListener {
-
-            isRandomPlayingActivated =!isRandomPlayingActivated
-
-            var cardDrawable: Drawable = binding.cardShuffle.background
-            cardDrawable = DrawableCompat.wrap(cardDrawable)
-            var ivDrawable = binding.shuffleIv.background
-            ivDrawable = DrawableCompat.wrap(ivDrawable)
-
-            if(isRandomPlayingActivated) {
-
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-                binding.cardShuffle.background = cardDrawable
-
-                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
-                binding.shuffleIv.background = ivDrawable
-            }
-
-            else{
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-                binding.cardShuffle.background = cardDrawable
-
-                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
-                binding.shuffleIv.background = ivDrawable
-            }
-
-            Toast.makeText(this, "shuffle", Toast.LENGTH_SHORT).show()
-            if (isRepeatActivated){
-                isRepeatActivated = false
-            }
-        }
-
-        binding.cardBookmark.setOnClickListener {
-
-            stateBoolean = !stateBoolean
-            if (stateBoolean){
-                dbHelper.roomDao().setFavorite(1,pos+1)
-
-                DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
-                binding.cardBookmark.background = cardDrawableBookmark
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
-
             }else{
-                dbHelper.roomDao().setFavorite(0,pos+1)
-
+                stateBoolean = false
                 DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
                 binding.cardBookmark.background = cardDrawableBookmark
+
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+            }
+            binding.cardShuffle.setOnClickListener {
+
+                isRandomPlayingActivated =!isRandomPlayingActivated
+
+                var cardDrawable: Drawable = binding.cardShuffle.background
+                cardDrawable = DrawableCompat.wrap(cardDrawable)
+                var ivDrawable = binding.shuffleIv.background
+                ivDrawable = DrawableCompat.wrap(ivDrawable)
+
+                if(isRandomPlayingActivated) {
+
+                    DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+                    binding.cardShuffle.background = cardDrawable
+
+                    DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+                    binding.shuffleIv.background = ivDrawable
+                }
+
+                else{
+                    DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+                    binding.cardShuffle.background = cardDrawable
+
+                    DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+                    binding.shuffleIv.background = ivDrawable
+                }
+
+                Toast.makeText(this, "shuffle", Toast.LENGTH_SHORT).show()
+                if (isRepeatActivated){
+                    isRepeatActivated = false
+                }
+            }
+
+            binding.cardBookmark.setOnClickListener {
+
+                stateBoolean = !stateBoolean
+                if (stateBoolean){
+                    viewModel.setFavorite(1,pos+1)
+
+                    //DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
+                    //binding.cardBookmark.background = cardDrawableBookmark
+                    binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
+
+                }else{
+                    viewModel.setFavorite(0,pos+1)
+
+                    DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
+                    binding.cardBookmark.background = cardDrawableBookmark
+                    binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+
+                }
 
             }
 
-        }
+            binding.cardRepeat.setOnClickListener{
 
-        binding.cardRepeat.setOnClickListener{
+                isRepeatActivated = !isRepeatActivated
 
-            isRepeatActivated = !isRepeatActivated
+                var cardDrawable: Drawable = binding.cardRepeat.background
+                cardDrawable = DrawableCompat.wrap(cardDrawable)
 
-            var cardDrawable: Drawable = binding.cardRepeat.background
-            cardDrawable = DrawableCompat.wrap(cardDrawable)
+                var ivDrawable = binding.repeatIv.background
+                ivDrawable = DrawableCompat.wrap(ivDrawable)
 
-            var ivDrawable = binding.repeatIv.background
-            ivDrawable = DrawableCompat.wrap(ivDrawable)
+                if(isRepeatActivated){
+                    DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
+                    binding.cardRepeat.background = cardDrawable
 
-            if(isRepeatActivated){
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.shuffleColor))
-                binding.cardRepeat.background = cardDrawable
+                    DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
+                    binding.repeatIv.background = ivDrawable
+                }else{
+                    DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
+                    binding.cardRepeat.background = cardDrawable
 
-                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.white))
-                binding.repeatIv.background = ivDrawable
-            }else{
-                DrawableCompat.setTint(cardDrawable, resources.getColor(R.color.musicActivity))
-                binding.cardRepeat.background = cardDrawable
+                    DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
+                    binding.repeatIv.background = ivDrawable
+                }
 
-                DrawableCompat.setTint(ivDrawable, resources.getColor(R.color.shuffleColor))
-                binding.repeatIv.background = ivDrawable
+                Toast.makeText(this, "repeat", Toast.LENGTH_SHORT).show()
+
+                if (isRandomPlayingActivated){
+                    isRandomPlayingActivated = false
+                }
             }
 
-            Toast.makeText(this, "repeat", Toast.LENGTH_SHORT).show()
-
-            if (isRandomPlayingActivated){
-                isRandomPlayingActivated = false
+            binding.cardAddToList.setOnClickListener {
+                Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
             }
-        }
 
-        binding.cardAddToList.setOnClickListener {
-            Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
         }
 
 

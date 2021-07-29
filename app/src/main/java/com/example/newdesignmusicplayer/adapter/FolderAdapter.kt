@@ -3,6 +3,8 @@ package com.example.newdesignmusicplayer.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -12,19 +14,19 @@ import com.example.newdesignmusicplayer.room.RoomFolderModel
 import java.io.Serializable
 
 
-class FolderAdapter(val listener: OnFolderListener): RecyclerView.Adapter<FolderAdapter.ViewHolderHomeFragment>() ,Serializable{
+class FolderAdapter(val listener: OnFolderListener,var folders : List<RoomFolderModel>): RecyclerView.Adapter<FolderAdapter.ViewHolderHomeFragment>() ,Serializable{
 
-    private val itemCallback = object : DiffUtil.ItemCallback<RoomFolderModel>(){
-        override fun areItemsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
-            return oldItem == newItem
-        }
+//    private val itemCallback = object : DiffUtil.ItemCallback<RoomFolderModel>(){
+//        override fun areItemsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
+//            return oldItem == newItem
+//        }
+//
+//        override fun areContentsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
+//            return  oldItem.folderName == newItem.folderName
+//        }
+//    }
 
-        override fun areContentsTheSame(oldItem: RoomFolderModel, newItem: RoomFolderModel): Boolean {
-            return  oldItem.folderName == newItem.folderName
-        }
-    }
-
-    val differ = AsyncListDiffer(this,itemCallback)
+    //val differ = AsyncListDiffer(this,itemCallback)
 
 
     inner class ViewHolderHomeFragment(private  var binding: FolderItemViewBinding): RecyclerView.ViewHolder(binding.root){
@@ -54,9 +56,9 @@ class FolderAdapter(val listener: OnFolderListener): RecyclerView.Adapter<Folder
         )
     }
 
-    override fun getItemCount(): Int = differ.currentList.size
+    override fun getItemCount(): Int = folders.size
 
     override fun onBindViewHolder(holder: ViewHolderHomeFragment, position: Int) {
-        holder.onBind(differ.currentList[position])
+        holder.onBind(folders[position])
     }
 }

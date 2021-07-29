@@ -10,7 +10,10 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModelProvider
 import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.adapter.AdapterForFolderSelection
 import com.example.newdesignmusicplayer.databinding.ActivityFolderSelectionBinding
@@ -18,6 +21,7 @@ import com.example.newdesignmusicplayer.interfaces.OnFolderForSelection
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
 import com.example.newdesignmusicplayer.room.RoomFolderModel
+import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import java.io.Serializable
 
 class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serializable {
@@ -26,15 +30,22 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
     private lateinit var dbHelper: RoomDbHelper
     private lateinit var adapter :AdapterForFolderSelection
     private lateinit var data : List<RoomAudioModel>
+    private lateinit var viewModel :MediaViewModel
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFolderSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+
         dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
-        adapter = AdapterForFolderSelection(this)
+        viewModel.folders.observe(this){
+            adapter = AdapterForFolderSelection(this,it)
+        }
+        //adapter = AdapterForFolderSelection(this,viewModel.folders)
         data = intent.getSerializableExtra("data") as List<RoomAudioModel>
 
         // status bar text color
@@ -81,38 +92,47 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
                 }else{
                     //do mentioned
                     val newRoomFolder = RoomFolderModel(folderName = folderName,audioList = listOf<RoomAudioModel>())
-                    dbHelper.roomDao().insertFolder(newRoomFolder)
-                    adapter.notifyItemInserted(dbHelper.roomDao().getFoldersCount()-1)
+                   // dbHelper.roomDao().insertFolder(newRoomFolder)
+                    insertFolderToDatabase(newRoomFolder)
+                    adapter.notifyItemInserted(viewModel.getFoldersCount()-1)
                     //adapter.notifyDataSetChanged()
                     dialog.dismiss()
                 }
             }
         }
-        dbHelper.roomDao().getFolders()?.let { setAdapter(it) }
+       // dbHelper.roomDao().getFolders().let { setAdapter(it) }
+        viewModel.folders.observe(this){
+            setAdapter(it)
+        }
+        //setAdapter(viewModel.folders)
 
+    }
+    private fun insertFolderToDatabase(roomFolderModel: RoomFolderModel){
+        viewModel.insertFolder(roomFolderModel)
     }
 
     private  fun setAdapter(folders:List<RoomFolderModel>){
-        adapter.differ.submitList(folders)
+        adapter.folders = folders
         binding.recyclerView.adapter=adapter
     }
 
     override fun onFolderForSelectionClick(model: RoomFolderModel, position: Int) {
-        val folder = dbHelper.roomDao().getFolder(model.folderName)
-        val wholeData  = ArrayList<RoomAudioModel>()
-        val nonDuplicatedMusic = ArrayList<RoomAudioModel>()
+        viewModel.getFolder(model.folderName).observe(this){
+            val wholeData  = ArrayList<RoomAudioModel>()
+            val nonDuplicatedMusic = ArrayList<RoomAudioModel>()
 
-        for (i in data.indices){
-            if (!folder.audioList.contains(data[i])){
-                nonDuplicatedMusic.add(data[i])
-            }else{
-                Toast.makeText(this, "found   ", Toast.LENGTH_SHORT).show()
+            for (i in data.indices){
+                if (!it.audioList.contains(data[i])){
+                    nonDuplicatedMusic.add(data[i])
+                }else{
+                    Toast.makeText(this, "found   ", Toast.LENGTH_SHORT).show()
+                }
             }
+            wholeData.addAll(it.audioList)
+            wholeData.addAll(nonDuplicatedMusic)
+            it.audioList = wholeData
+            viewModel.updateFolder(it)
+            onBackPressed()
         }
-        wholeData.addAll(folder.audioList)
-        wholeData.addAll(nonDuplicatedMusic)
-        folder.audioList = wholeData
-        dbHelper.roomDao().updateFolder(folder)
-        onBackPressed()
     }
 }

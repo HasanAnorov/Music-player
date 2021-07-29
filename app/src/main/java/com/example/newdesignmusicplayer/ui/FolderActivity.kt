@@ -14,12 +14,14 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.adapter.MusicAdapter
 import com.example.newdesignmusicplayer.databinding.ActivityFolderBinding
 import com.example.newdesignmusicplayer.interfaces.OnMusicItemClick
 import com.example.newdesignmusicplayer.room.RoomAudioModel
 import com.example.newdesignmusicplayer.room.RoomDbHelper
+import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
@@ -29,9 +31,9 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
     private lateinit var binding: ActivityFolderBinding
     private lateinit var adapter: MusicAdapter
     private lateinit var musicList: List<RoomAudioModel>
-    private lateinit var dbHelper: RoomDbHelper
     var isSelectionModeEnabled = false
     var selectList = ArrayList<RoomAudioModel>()
+    private lateinit var viewModel:MediaViewModel
     private lateinit var folderName :String
 
     @SuppressLint("SetTextI18n")
@@ -41,7 +43,8 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
         binding = ActivityFolderBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
-        dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        //dbHelper = RoomDbHelper.DatabaseBuilder.getInstance(this)
+        viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
 
         // status bar text color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -55,10 +58,12 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
         }
 
         folderName = intent.getStringExtra("folderName") as String
-        val folder = dbHelper.roomDao().getFolder(folderName)
-        musicList = folder.audioList
+        viewModel.getFolder(folderName).observe(this){
+            musicList = it.audioList
+            binding.textView.text = "${musicList.size} tracks"
+            setAdapter(musicList, folderName)
+        }
 
-        binding.textView.text = "${musicList.size} tracks"
         binding.tvFolderName.text = folderName
         binding.btnArrow.elevation = 0F
         binding.addCard.elevation = 0F
@@ -81,6 +86,7 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             }
             setBehaviour(false)
         }
+
         binding.shareCard.setOnClickListener {
             Toast.makeText(this, selectList[0].audioUri, Toast.LENGTH_SHORT).show()
             val sharePath: String = Environment.getExternalStorageDirectory().path
@@ -93,16 +99,19 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             binding.bottomSheet.visibility = View.GONE
             setBehaviour(false)
         }
+
         binding.deleteCard.setOnClickListener {
-            val tempFolder = dbHelper.roomDao().getFolder(folderName)
-            val folderList = tempFolder.audioList.toMutableList()
-            for(i in 0 until selectList.size){
-                selectList[i].isSelected = false
-                folderList.remove(selectList[i])
-                Toast.makeText(this, selectList[i].audioTitle, Toast.LENGTH_SHORT).show()
+            viewModel.getFolder(folderName).observe(this){
+                val folderList = it.audioList.toMutableList()
+                for(i in 0 until selectList.size){
+                    selectList[i].isSelected = false
+                    folderList.remove(selectList[i])
+                    Toast.makeText(this, selectList[i].audioTitle, Toast.LENGTH_SHORT).show()
+                }
+                it.audioList = folderList
+                viewModel.updateFolder(it)
             }
-            tempFolder.audioList = folderList
-            dbHelper.roomDao().updateFolder(tempFolder)
+
             
             binding.bottomSheet.visibility = View.GONE
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -110,6 +119,7 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             }
             setBehaviour(false)
         }
+
         binding.selectCard.setOnClickListener {
             if (selectList.size == adapter.differ.currentList.size) {
                 binding.selectAllIv.setImageResource(R.drawable.ic_dry_clean)
@@ -149,8 +159,6 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             override fun afterTextChanged(s: Editable?) {
             }
         })
-
-        setAdapter(musicList, folderName)
 
         binding.btnArrow.setOnClickListener {
             onBackPressed()
