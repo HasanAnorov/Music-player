@@ -189,7 +189,8 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
                 myFiles.add(song)
             }
         }
-        adapter.differ.submitList(myFiles)
+        //adapter.differ.submitList(myFiles)
+        setAdapter(myFiles,folderName)
     }
 
     override fun onMenuItemClick(model: RoomAudioModel, position: Int, view: View) {

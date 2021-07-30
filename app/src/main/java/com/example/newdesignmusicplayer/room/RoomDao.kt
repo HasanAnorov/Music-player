@@ -7,9 +7,6 @@ import androidx.room.*
 @Dao
 interface RoomDao {
 
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertMusic(roomAudioModel: RoomAudioModel)
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMusics(musics: List<RoomAudioModel>)
 

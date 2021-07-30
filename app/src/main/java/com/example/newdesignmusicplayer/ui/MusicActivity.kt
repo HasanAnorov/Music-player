@@ -40,8 +40,8 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
-    //private lateinit var dbHelper: RoomDbHelper
     private lateinit var viewModel:MediaViewModel
+    private lateinit var data : List<RoomAudioModel>
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +63,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             window.navigationBarColor = getColor(R.color.musicActivity)
         }
 
-        //dbHelper  = RoomDbHelper.DatabaseBuilder.getInstance(this)
         val position = intent.getIntExtra("position", 0)
         val folderName = intent.getStringExtra("folderName") as String
         viewModel.getFolder(folderName).observe(this){
@@ -121,7 +120,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //getting audio image
-    fun getAlbumArt(uri: String): ByteArray? {
+    private fun getAlbumArt(uri: String): ByteArray? {
         val retriever = MediaMetadataRetriever()
         retriever.setDataSource(uri)
         val art = retriever.embeddedPicture
@@ -140,7 +139,6 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
         mediaPlayer = MediaPlayer()
         mediaPlayer.reset()
-        //mediaPlayer.playbackParams.speed
         mediaPlayer.apply {
             setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
             setAudioAttributes(
@@ -151,26 +149,24 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             )
         }
 
-        viewModel.getMusic(pos+1).observe(this){
+        viewModel.getMusic(pos+1).observe(this){roomAudioModel ->
 
             var cardDrawableBookmark: Drawable = binding.cardBookmark.background
             cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
 
-            val state = it.isFavorite
-            var stateBoolean = false
+            val state = roomAudioModel.isFavorite
+            var stateBoolean: Boolean
+
             if(state==1){
                 stateBoolean = true
-                //DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
-                //binding.cardBookmark.background = cardDrawableBookmark
-
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
             }else{
                 stateBoolean = false
                 DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
                 binding.cardBookmark.background = cardDrawableBookmark
-
                 binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
             }
+
             binding.cardShuffle.setOnClickListener {
 
                 isRandomPlayingActivated =!isRandomPlayingActivated
@@ -204,33 +200,35 @@ open class MusicActivity : AppCompatActivity(),Serializable {
             }
 
             binding.cardBookmark.setOnClickListener {
-
                 stateBoolean = !stateBoolean
-                if (stateBoolean){
-                    viewModel.setFavorite(1,pos+1)
+                viewModel.getFolder("Favorites").observe(this){roomFolderModel ->
 
-                    //DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.shuffleColor))
-                    //binding.cardBookmark.background = cardDrawableBookmark
-                    binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
-
-                }else{
-                    viewModel.setFavorite(0,pos+1)
-
-                    DrawableCompat.setTint(cardDrawableBookmark, resources.getColor(R.color.musicActivity))
-                    binding.cardBookmark.background = cardDrawableBookmark
-                    binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
-
+                    if (stateBoolean){
+                        viewModel.setFavorite(1,pos+1)
+                        roomFolderModel.audioList.toMutableList().add(audioArrayList[pos])
+                        val folderList = ArrayList<RoomAudioModel>()
+                        folderList.addAll(roomFolderModel.audioList)
+                        folderList.add(audioArrayList[pos])
+                        roomFolderModel.audioList = folderList
+                        viewModel.updateFolder(roomFolderModel)
+                        binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
+                    }else{
+                        viewModel.setFavorite(0,pos+1)
+                        val folderList = ArrayList<RoomAudioModel>()
+                        folderList.addAll(roomFolderModel.audioList)
+                        folderList.remove(audioArrayList[pos])
+                        roomFolderModel.audioList = folderList
+                       // viewModel.updateFolder(roomFolderModel)
+                        binding.cardBookmark.background = cardDrawableBookmark
+                        binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
+                    }
                 }
-
             }
 
             binding.cardRepeat.setOnClickListener{
-
                 isRepeatActivated = !isRepeatActivated
-
                 var cardDrawable: Drawable = binding.cardRepeat.background
                 cardDrawable = DrawableCompat.wrap(cardDrawable)
-
                 var ivDrawable = binding.repeatIv.background
                 ivDrawable = DrawableCompat.wrap(ivDrawable)
 
@@ -254,13 +252,13 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                     isRandomPlayingActivated = false
                 }
             }
-
             binding.cardAddToList.setOnClickListener {
-                Toast.makeText(this, "addToList", Toast.LENGTH_SHORT).show()
+                val intent =Intent(this,FolderSelectionActivity::class.java)
+                intent.putExtra("data", listOf<RoomAudioModel>(audioArrayList[pos]) as Serializable)
+                startActivity(intent)
             }
 
         }
-
 
         playAudio(pos,audioArrayList)
 
@@ -298,7 +296,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     //play audio file
     private fun playAudio(pos: Int,audioArrayList: List<RoomAudioModel>) {
         try {
-            val image = audioArrayList[pos].audioUri?.let { getAlbumArt(it) }
+            val image = getAlbumArt(audioArrayList[pos].audioUri)
             if (image!=null){
                 Glide.with(this).asBitmap().load(image).into(binding.musicPhoto)
             }

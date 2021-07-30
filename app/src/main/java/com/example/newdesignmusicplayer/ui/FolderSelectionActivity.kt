@@ -45,7 +45,6 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
         viewModel.folders.observe(this){
             adapter = AdapterForFolderSelection(this,it)
         }
-        //adapter = AdapterForFolderSelection(this,viewModel.folders)
         data = intent.getSerializableExtra("data") as List<RoomAudioModel>
 
         // status bar text color
@@ -65,7 +64,6 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
         binding.btnArrow.setOnClickListener {
             onBackPressed()
         }
-
         binding.addFolder.setOnClickListener {
             val dialog = AlertDialog.Builder(this).create()
             val dialogView = layoutInflater.inflate(R.layout.adding_folder_dialog_new, binding.root, false)
@@ -100,13 +98,12 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
                 }
             }
         }
-       // dbHelper.roomDao().getFolders().let { setAdapter(it) }
+
         viewModel.folders.observe(this){
             setAdapter(it)
         }
-        //setAdapter(viewModel.folders)
-
     }
+
     private fun insertFolderToDatabase(roomFolderModel: RoomFolderModel){
         viewModel.insertFolder(roomFolderModel)
     }
@@ -124,8 +121,9 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
             for (i in data.indices){
                 if (!it.audioList.contains(data[i])){
                     nonDuplicatedMusic.add(data[i])
-                }else{
-                    Toast.makeText(this, "found   ", Toast.LENGTH_SHORT).show()
+                }
+                if(model.folderName == "Favorites"){
+                    viewModel.setFavorite(1,data[i].id+1)
                 }
             }
             wholeData.addAll(it.audioList)
