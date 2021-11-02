@@ -16,8 +16,8 @@ interface RoomDao {
     @Query("UPDATE RoomFolderModel SET folderName = :newFolderName WHERE folderName = :oldFolderName")
     suspend fun setNewFolderName(newFolderName: String, oldFolderName: String)
 
-    @Query("UPDATE ROOMAUDIOMODEL SET isFavorite= :intState WHERE id = :position")
-    suspend fun setFavorite(intState:Int,position: Int)
+    @Query("UPDATE ROOMAUDIOMODEL SET isFavorite= :intState WHERE audioTitle = :musicTitle")
+    suspend fun setFavorite(intState:Int,musicTitle: String)
 
     @Query("SELECT EXISTS ( SELECT * FROM roomfoldermodel WHERE folderName = :newFolderName)")
     suspend fun checkForExists(newFolderName: String):Boolean
@@ -32,7 +32,7 @@ interface RoomDao {
     suspend fun getFoldersCount():Int
 
     @Query("SELECT * FROM roomfoldermodel WHERE folderName = :name ")
-    suspend fun getFolder(name: String):RoomFolderModel
+    fun getFolder(name: String):RoomFolderModel
 
     @Query("SELECT * FROM roomaudiomodel WHERE id = :position")
     fun getMusic(position:Int):RoomAudioModel

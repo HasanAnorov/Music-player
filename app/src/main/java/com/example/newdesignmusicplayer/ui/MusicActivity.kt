@@ -2,19 +2,11 @@ package com.example.newdesignmusicplayer.ui
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.drawable.Drawable
-import android.media.AudioAttributes
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.PowerManager
+import android.os.*
+import android.util.Log
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -22,35 +14,73 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.example.newdesignmusicplayer.utils.CreateNotification
 import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.databinding.ActivityMusicNewBinding
 import com.example.newdesignmusicplayer.room.RoomAudioModel
-import com.example.newdesignmusicplayer.room.RoomDbHelper
+import com.example.newdesignmusicplayer.services.MediaService
 import com.example.newdesignmusicplayer.services.OnClearFromRecentService
+import com.example.newdesignmusicplayer.utils.CreateNotification
 import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import java.io.Serializable
+import android.os.Bundle
+import android.content.Intent
+import android.content.BroadcastReceiver
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 open class MusicActivity : AppCompatActivity(),Serializable {
 
     private lateinit var binding:ActivityMusicNewBinding
-    private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var audioArrayList: List<RoomAudioModel>
+    lateinit var audioArrayList: List<RoomAudioModel>
     var current_pos = 0.0
     private var total_duration: Double = 0.0
     private var audio_index = 0
     private var notificationManager: NotificationManager? = null
     private lateinit var viewModel:MediaViewModel
-    private lateinit var data : List<RoomAudioModel>
+    private var musicService  : MediaService ? = MediaService()
+    val TAG = "MUSIC_ACTIVITY"
+    private var mBound: Boolean = false
+
+    /** Defines callbacks for service binding, passed to bindService()  */
+    private val connection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as MediaService.LocalBinder
+            musicService = binder.getService()
+
+            Log.d(TAG,"onServiceConnected getting musicService instance - $musicService")
+            mBound = true
+            Log.d(TAG, "onServiceConnection and getting duration - ${musicService!!.mediaPlayer}")
+            Log.d(TAG, "onServiceConnection and getting duration1 - ${musicService!!.mediaPlayer?.duration}")
+            Log.d(TAG, "onServiceConnection and getting duration2 - ${musicService!!.mediaPlayer?.isPlaying}")
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            Log.d(TAG,"onServiceDisconnect")
+            mBound = false
+        }
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        Intent(this, MediaService::class.java).also { intent ->
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            Log.d(TAG,"onStart")
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG,"onCreate")
         binding = ActivityMusicNewBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
-
         viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
+
+        //this relates to mMessageReceiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, IntentFilter("MediaPlayerDurationUpdates"))
 
         binding.cardBookmark.elevation = 0F
         binding.cardAddToList.elevation = 0F
@@ -58,16 +88,24 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         binding.cardShuffle.elevation = 0F
 
         //changing status and navigationBar colors
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.statusBarColor = getColor(R.color.musicActivity)
-            window.navigationBarColor = getColor(R.color.musicActivity)
-        }
+        window.statusBarColor = getColor(R.color.musicActivity)
+        window.navigationBarColor = getColor(R.color.musicActivity)
 
         val position = intent.getIntExtra("position", 0)
         val folderName = intent.getStringExtra("folderName") as String
+
+        Log.d(TAG, "call to service")
+        // start localService
+        Intent(this, MediaService::class.java).also { intent ->
+            intent.putExtra("service_position",position)
+            intent.putExtra("folder_name",folderName)
+            startService(intent)
+        }
+
         viewModel.getFolder(folderName).observe(this){
             audioArrayList = it.audioList
-            setAudio(position,audioArrayList)
+            setAudio(position, audioArrayList)
+            Log.d(TAG,audioArrayList[position].audioTitle + " ------ " + audioArrayList[position].audioDuration )
         }
 
         val broadcastReceiver = object :BroadcastReceiver(){
@@ -77,10 +115,11 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                     CreateNotification().ACTION_NEXT -> {
                         nextAudio(audioArrayList)
                     }
-                    CreateNotification().ACTION_PLAY ->{
+                    CreateNotification().ACTION_PLAY -> {
                         setPause(audioArrayList)
+                        Log.d(TAG,"action play in notification")
                     }
-                    CreateNotification().ACTION_PREVIOUS ->{
+                    CreateNotification().ACTION_PREVIOUS -> {
                         prevAudio(audioArrayList)
                     }
                 }
@@ -108,49 +147,29 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         }
     }
 
-    //creating channel
-    private fun createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CreateNotification().CHANNEL_ID,"AppNameHasan",NotificationManager.IMPORTANCE_LOW).apply {
-                setShowBadge(false)
-            }
-            notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(channel)
-        }
-    }
+    //you can send data to activity if you want
+    private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            // Get extra data included in the Intent
+            val message = intent.getStringExtra("mediaDuration")
+            Log.d(TAG,"hello receiver and message  -  $message")
+            binding.musicDuration.text = timerConversion(message.toString().toLong())
+            total_duration = message.toString().toDouble()
 
-    //getting audio image
-    private fun getAlbumArt(uri: String): ByteArray? {
-        val retriever = MediaMetadataRetriever()
-        retriever.setDataSource(uri)
-        val art = retriever.embeddedPicture
-        retriever.release()
-        return art
+        }
     }
 
     //setting audio files
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun setAudio(pos: Int,audioArrayList:List<RoomAudioModel>) {
+    private fun setAudio(pos: Int, audioArrayList: List<RoomAudioModel>) {
+        Log.d(TAG, "setAudio -  $musicService")
 
         var isRepeatActivated = false
         var isRandomPlayingActivated = false
 
-        audio_index = pos
+       // audio_index = pos
 
-        mediaPlayer = MediaPlayer()
-        mediaPlayer.reset()
-        mediaPlayer.apply {
-            setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
-            setAudioAttributes(
-                    AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .build()
-            )
-        }
-
-        viewModel.getMusic(pos+1).observe(this){roomAudioModel ->
-
+        viewModel.getMusic(pos + 1).observe(this){ roomAudioModel ->
             var cardDrawableBookmark: Drawable = binding.cardBookmark.background
             cardDrawableBookmark = DrawableCompat.wrap(cardDrawableBookmark)
 
@@ -198,13 +217,12 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                     isRepeatActivated = false
                 }
             }
-
             binding.cardBookmark.setOnClickListener {
                 stateBoolean = !stateBoolean
-                viewModel.getFolder("Favorites").observe(this){roomFolderModel ->
+                viewModel.getFolder("Favorites").observe(this){ roomFolderModel ->
 
                     if (stateBoolean){
-                        viewModel.setFavorite(1,pos+1)
+                        viewModel.setFavorite(1, audioArrayList[pos].audioTitle)
                         roomFolderModel.audioList.toMutableList().add(audioArrayList[pos])
                         val folderList = ArrayList<RoomAudioModel>()
                         folderList.addAll(roomFolderModel.audioList)
@@ -213,18 +231,17 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                         viewModel.updateFolder(roomFolderModel)
                         binding.bookmarkIv.setImageResource(R.drawable.ic_heart)
                     }else{
-                        viewModel.setFavorite(0,pos+1)
+                        viewModel.setFavorite(0, audioArrayList[pos].audioTitle)
                         val folderList = ArrayList<RoomAudioModel>()
                         folderList.addAll(roomFolderModel.audioList)
                         folderList.remove(audioArrayList[pos])
                         roomFolderModel.audioList = folderList
-                       // viewModel.updateFolder(roomFolderModel)
+                        viewModel.updateFolder(roomFolderModel)
                         binding.cardBookmark.background = cardDrawableBookmark
                         binding.bookmarkIv.setImageResource(R.drawable.ic_heart__6_)
                     }
                 }
             }
-
             binding.cardRepeat.setOnClickListener{
                 isRepeatActivated = !isRepeatActivated
                 var cardDrawable: Drawable = binding.cardRepeat.background
@@ -253,14 +270,14 @@ open class MusicActivity : AppCompatActivity(),Serializable {
                 }
             }
             binding.cardAddToList.setOnClickListener {
-                val intent =Intent(this,FolderSelectionActivity::class.java)
-                intent.putExtra("data", listOf<RoomAudioModel>(audioArrayList[pos]) as Serializable)
+                val intent =Intent(this, FolderSelectionActivity::class.java)
+                intent.putExtra("data", listOf(audioArrayList[pos]) as Serializable)
                 startActivity(intent)
             }
 
         }
 
-        playAudio(pos,audioArrayList)
+        //playAudio(pos)
 
         //seekbar change listener
         binding.tvSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -272,59 +289,71 @@ open class MusicActivity : AppCompatActivity(),Serializable {
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 current_pos = seekBar!!.progress.toDouble()
-                mediaPlayer.seekTo(current_pos.toInt())
+                musicService!!.seekTo(current_pos.toInt())
             }
         })
 
-        mediaPlayer.setOnCompletionListener {
-            if (isRandomPlayingActivated){
-                val random = (0 until audioArrayList.size).random()
-                audio_index = random
-            }
-            if (!isRandomPlayingActivated && !isRepeatActivated){
-                audio_index++
-            }
-            if (audio_index < (audioArrayList.size)) {
-                playAudio(audio_index,audioArrayList)
-            } else {
-                audio_index = 0
-                playAudio(audio_index,audioArrayList)
-            }
-        }
+        //musicService.setOnCompleteListener(isRandomPlayingActivated, isRepeatActivated)
+        //musicService.onCompleted()
     }
 
     //play audio file
-    private fun playAudio(pos: Int,audioArrayList: List<RoomAudioModel>) {
-        try {
+    private fun playAudio(pos: Int) {
+
+        //Playing music from service
+        Log.d(TAG, "playAudio - $musicService")
+        Log.d(TAG, "playAudio mediaPlayer 001- ${musicService!!.mediaPlayer}")
+        Log.d(TAG, "playAudio mediaPlayer 002- ${musicService!!.mediaPlayer?.duration}")
+
+        Log.d(TAG,"given position - " + pos)
+
+            //musicService!!.playMedia(pos)
+
+            //Log.d(TAG, "playAudio - " + musicService.getDuration())
             val image = getAlbumArt(audioArrayList[pos].audioUri)
+
             if (image!=null){
-                Glide.with(this).asBitmap().load(image).into(binding.musicPhoto)
+                Glide.with(applicationContext).asBitmap().load(image).into(binding.musicPhoto)
             }
             binding.playPause.setImageResource(R.drawable.ic_pause)
             binding.musicName.text = audioArrayList[pos].audioTitle
             binding.musicAuthor.text = audioArrayList[pos].audioArtist
-            binding.musicDuration.text = audioArrayList[pos].audioDuration
-
-            mediaPlayer.stop()
-            mediaPlayer.reset()
 
             //set file path
-            CreateNotification().createNotification(this,audioArrayList[pos], R.drawable.ic_pause)
-            mediaPlayer.setDataSource(applicationContext, Uri.parse(audioArrayList[pos].audioUri!!))
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+            CreateNotification().createNotification(this, audioArrayList[pos], R.drawable.ic_pause)
 
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        setAudioProgress()
+        //setAudioProgress()
     }
+
+    //creating channel
+    private fun createChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CreateNotification().CHANNEL_ID, "AppNameHasan", NotificationManager.IMPORTANCE_LOW).apply {
+                setShowBadge(false)
+            }
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(channel)
+        }
+    }
+
+    //getting audio image
+    private fun getAlbumArt(uri: String): ByteArray? {
+        val retriever = MediaMetadataRetriever()
+        retriever.setDataSource(uri)
+        val art = retriever.embeddedPicture
+        retriever.release()
+        return art
+    }
+
 
     //set audio progress
     private fun setAudioProgress() {
+
         //get the audio duration
-        current_pos = mediaPlayer.currentPosition.toDouble()
-        total_duration = mediaPlayer.duration.toDouble()
+        current_pos = musicService!!.currentPosition()!!
+        total_duration = musicService!!.duration()!!
+        Log.d(TAG, "setAudioProgress - $current_pos " +
+                "totalDuration -   $total_duration")
 
         //display the audio duration
         binding.musicDuration.text = timerConversion(total_duration.toLong())
@@ -334,7 +363,7 @@ open class MusicActivity : AppCompatActivity(),Serializable {
         val runnable: Runnable = object : Runnable {
             override fun run() {
                 try {
-                    current_pos = mediaPlayer.currentPosition.toDouble()
+                    current_pos = musicService!!.currentPosition()!!.toDouble()
                     binding.tvStartTime.text = timerConversion(current_pos.toLong())
                     binding.tvSeekBar.progress = current_pos.toInt()
                     handler.postDelayed(this, 1000)
@@ -347,42 +376,40 @@ open class MusicActivity : AppCompatActivity(),Serializable {
     }
 
     //play previous audio
-    private fun prevAudio(audioArrayList:List<RoomAudioModel> ) {
+    private fun prevAudio(audioArrayList: List<RoomAudioModel>) {
         if (audio_index > 0) {
             audio_index--
-            playAudio(audio_index,audioArrayList)
-           // CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+            playAudio(audio_index)
         } else {
             audio_index = audioArrayList.size - 1
-            playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+            playAudio(audio_index)
         }
     }
 
     //play next audio
-    private fun nextAudio(audioArrayList:List<RoomAudioModel> ) {
+    private fun nextAudio(audioArrayList: List<RoomAudioModel>) {
         if (audio_index < audioArrayList.size - 1) {
             audio_index++
-            playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+            playAudio(audio_index)
+            Log.d(TAG, "play audio index - $audio_index")
         } else {
             audio_index = 0
-            playAudio(audio_index,audioArrayList)
-            //CreateNotification().createNotification(this,audioArrayList[audio_index],R.drawable.ic_pause)
+            playAudio(audio_index)
         }
     }
 
     //pause audio
     private fun setPause(audioArrayList: List<RoomAudioModel>) {
-        if (mediaPlayer.isPlaying) {
-            mediaPlayer.pause()
+        Log.d(TAG,"setPause1 - " + musicService!!.mediaPlayer)
+        Log.d(TAG,"setPause2 - " + musicService!!.mediaPlayer?.isPlaying)
+        if (musicService!!.isPlaying()) {
+            musicService!!.pause()
             binding.playPause.setImageResource(R.drawable.ic_play_button_arrowhead)
-            CreateNotification().createNotification(this,audioArrayList[audio_index], R.drawable.ic_play_button_arrowhead)
-            //Toast.makeText(this, audioArrayList[audio_index].audioDuration, Toast.LENGTH_SHORT).show()
+            CreateNotification().createNotification(this, audioArrayList[audio_index], R.drawable.ic_play_button_arrowhead)
         } else {
-            mediaPlayer.start()
+            musicService!!.start()
             binding.playPause.setImageResource(R.drawable.ic_pause)
-            CreateNotification().createNotification(this,audioArrayList[audio_index], R.drawable.ic_pause)
+            CreateNotification().createNotification(this, audioArrayList[audio_index], R.drawable.ic_pause)
         }
     }
 

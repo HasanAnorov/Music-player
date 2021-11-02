@@ -77,7 +77,9 @@
             android:focusable="true"
             android:clickable="true"
             app:cardCornerRadius="9dp"
-            app:layout_constraintEnd_toStartOf="@id/shareCard"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.2"
+            app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_height="wrap_content">
 
@@ -123,13 +125,16 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/shareCard"
             android:foreground="?android:attr/selectableItemBackground"
-            app:layout_constraintStart_toEndOf="@id/addCard"
-            app:layout_constraintEnd_toStartOf="@id/deleteCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="2dp"
             android:focusable="true"
             android:clickable="true"
             android:layout_marginEnd="2dp"
+            app:layout_constraintWidth_percent="0.2"
+            app:layout_constraintHorizontal_bias="0.34"
             app:cardCornerRadius="9dp"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="0dp"
@@ -176,16 +181,19 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/deleteCard"
             android:foreground="?android:attr/selectableItemBackground"
-            app:layout_constraintStart_toEndOf="@id/shareCard"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
+            android:visibility="visible"
+            app:layout_constraintWidth_percent="0.2"
+            app:layout_constraintHorizontal_bias="0.64"
             app:cardCornerRadius="9dp"
             android:focusable="true"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_width="0dp"
-            app:layout_constraintEnd_toStartOf="@id/selectCard"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout

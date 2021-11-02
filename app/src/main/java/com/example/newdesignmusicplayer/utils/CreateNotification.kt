@@ -33,15 +33,7 @@ class CreateNotification {
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST,track.audioArtist)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION,3L)
                     .build())
-//            if (track.audioDuration ==null){
-//                Toast.makeText(context, "null", Toast.LENGTH_SHORT).show()
-//            }else{
-//                Toast.makeText(context, track.audioDuration, Toast.LENGTH_SHORT).show()
-//            }
-//            mediaSessionCompat.setPlaybackState(PlaybackStateCompat.Builder()
-//                    .setState(PlaybackStateCompat.STATE_PLAYING,currentPosition,speed)
-//                    .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
-//                    .build())
+
 
             val icon = BitmapFactory.decodeResource(context.resources, R.drawable.music_photo)
 

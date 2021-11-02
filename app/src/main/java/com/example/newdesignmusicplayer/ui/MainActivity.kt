@@ -65,9 +65,11 @@ class MainActivity : AppCompatActivity(), OnFolderListener,Serializable {
         }
 
         //checking permission
-        if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(this@MainActivity,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             // Requesting the permission
-            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
+            ActivityCompat.requestPermissions(this@MainActivity,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), STORAGE_PERMISSION_CODE)
         }else{
             viewModel.folders.observe(this){
                 setAdapter(it)

@@ -66,7 +66,20 @@ class MusicAdapter(
             }
         }
 
+        fun setSelectionSign(boolean:Boolean){
+            if (boolean){
+                binding.ivBack.visibility = View.GONE
+                binding.ivSelector.visibility = View.VISIBLE
+                binding.cardMenu.isEnabled = false
+            }else{
+                binding.ivBack.visibility = View.VISIBLE
+                binding.ivSelector.visibility = View.GONE
+                binding.cardMenu.isEnabled = true
+            }
+        }
+
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderHomeFragment {
         return  ViewHolderHomeFragment(

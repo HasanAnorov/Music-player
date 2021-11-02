@@ -80,9 +80,9 @@ class MediaViewModel(application:Application) : AndroidViewModel(application){
         }
     }
 
-    fun setFavorite(intState:Int,position: Int){
+    fun setFavorite(intState:Int,musicTitle: String){
         viewModelScope.launch (Dispatchers.IO) {
-            repository.setFavorite(intState, position)
+            repository.setFavorite(intState, musicTitle)
         }
     }
 

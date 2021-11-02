@@ -22,12 +22,12 @@ class MediaRepository (private val mediaDao: RoomDao){
 
     suspend fun checkForExist(newFolderName: String):Boolean = mediaDao.checkForExists(newFolderName)
 
-    suspend fun getFolder(name: String):RoomFolderModel = mediaDao.getFolder(name)
+    fun getFolder(name: String):RoomFolderModel = mediaDao.getFolder(name)
 
     fun getMusic(position:Int) = mediaDao.getMusic(position)
 
-    suspend fun setFavorite(intState:Int, position: Int){
-        mediaDao.setFavorite(intState,position)
+    suspend fun setFavorite(intState:Int, musicTitle: String){
+        mediaDao.setFavorite(intState,musicTitle)
     }
 
     suspend fun insertMusics(musics:List<RoomAudioModel>){

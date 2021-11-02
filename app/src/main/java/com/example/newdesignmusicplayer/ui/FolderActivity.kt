@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginEnd
 import androidx.lifecycle.ViewModelProvider
 import com.example.newdesignmusicplayer.R
 import com.example.newdesignmusicplayer.adapter.MusicAdapter
@@ -25,6 +26,7 @@ import com.example.newdesignmusicplayer.viewmodel.MediaViewModel
 import com.github.zawadz88.materialpopupmenu.popupMenu
 import java.io.Serializable
 import java.util.*
+import kotlin.collections.ArrayList
 
 class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
 
@@ -47,15 +49,11 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
         viewModel = ViewModelProvider(this).get(MediaViewModel::class.java)
 
         // status bar text color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        }
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
         //status bar color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.statusBarColor = getColor(R.color.main_light)
-            window.navigationBarColor = getColor(R.color.white)
-        }
+        window.statusBarColor = getColor(R.color.main_light)
+        window.navigationBarColor = getColor(R.color.white)
 
         folderName = intent.getStringExtra("folderName") as String
         viewModel.getFolder(folderName).observe(this){
@@ -81,9 +79,7 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             startActivity(intent)
 
             binding.bottomSheet.visibility = View.GONE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.navigationBarColor = getColor(R.color.white)
-            }
+            window.navigationBarColor = getColor(R.color.white)
             setBehaviour(false)
         }
 
@@ -100,13 +96,16 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             setBehaviour(false)
         }
 
+        if (folderName == "Your musics"){
+            binding.deleteCard.visibility = View.GONE
+        }
         binding.deleteCard.setOnClickListener {
             viewModel.getFolder(folderName).observe(this){
-                val folderList = it.audioList.toMutableList()
+                val folderList = ArrayList<RoomAudioModel>()
+                folderList.addAll(it.audioList)
                 for(i in 0 until selectList.size){
                     selectList[i].isSelected = false
                     folderList.remove(selectList[i])
-                    Toast.makeText(this, selectList[i].audioTitle, Toast.LENGTH_SHORT).show()
                 }
                 it.audioList = folderList
                 viewModel.updateFolder(it)
@@ -189,12 +188,11 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
                 myFiles.add(song)
             }
         }
-        //adapter.differ.submitList(myFiles)
+
         setAdapter(myFiles,folderName)
     }
 
     override fun onMenuItemClick(model: RoomAudioModel, position: Int, view: View) {
-
         val popupMenu = popupMenu {
             style = R.style.Widget_MPM_Menu_Dark_CustomBackground
             section {
@@ -210,7 +208,7 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
                         startActivity(intent)
                     }
                 }
-                if (folderName.toString()!="Your musics"){
+                if (folderName!="Your musics"){
                     item {
                         labelRes = R.string.remove
                         labelColor = ContextCompat.getColor(this@FolderActivity, R.color.folderActivity)
@@ -229,10 +227,12 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
 
     override fun onBackPressed() {
         if (isSelectionModeEnabled) {
-            Toast.makeText(this, "1", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "1", Toast.LENGTH_SHORT).show()
             isSelectionModeEnabled = false
             for(i in 0 until adapter.differ.currentList.size){
-                adapter.differ.currentList[i].isSelected = false
+                if (adapter.differ.currentList[i].isSelected){
+                    adapter.differ.currentList[i].isSelected = false
+                }
             }
             adapter.notifyDataSetChanged()
             binding.bottomSheet.visibility = View.GONE
@@ -242,14 +242,6 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             binding.selectedMusicCount.text = 0.toString()
         } else{
             super.onBackPressed()
-        }
-        if (binding.bottomSheet.visibility == View.VISIBLE){
-            Toast.makeText(this, "2", Toast.LENGTH_SHORT).show()
-            binding.bottomSheet.visibility = View.GONE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.navigationBarColor = getColor(R.color.white)
-            }
-            binding.selectedMusicCount.text = 0.toString()
         }
     }
 
@@ -288,4 +280,5 @@ class FolderActivity : AppCompatActivity(),Serializable, OnMusicItemClick {
             binding.bottomSheet.animation = AnimationUtils.loadAnimation(this, R.anim.form_bottom)
         }
     }
+
 }

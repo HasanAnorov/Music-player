@@ -144,7 +144,7 @@
         app:layout_constraintTop_toTopOf="@id/tv_start_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="03:41"/>
+        android:text="00:00"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/btn_play_pause"
@@ -168,7 +168,7 @@
             android:layout_gravity="center"
             android:clickable="false"
             android:focusable="false"
-            android:src="@drawable/ic_play_button_arrowhead" />
+            android:src="@drawable/ic_pause" />
 
     </androidx.cardview.widget.CardView>
 

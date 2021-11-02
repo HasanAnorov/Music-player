@@ -123,7 +123,7 @@ class FolderSelectionActivity : AppCompatActivity(), OnFolderForSelection,Serial
                     nonDuplicatedMusic.add(data[i])
                 }
                 if(model.folderName == "Favorites"){
-                    viewModel.setFavorite(1,data[i].id+1)
+                    viewModel.setFavorite(1,data[i].audioTitle)
                 }
             }
             wholeData.addAll(it.audioList)
