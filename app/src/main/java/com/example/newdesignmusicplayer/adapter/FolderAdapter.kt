@@ -53,6 +53,4 @@ class FolderViewPagerAdapter(val itemClick:(folder: Folder, pos:Int) ->Unit): Re
         holder.onBind(differ.currentList[position],position)
     }
 
-
-
 }
